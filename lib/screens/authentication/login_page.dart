@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qonnect/screens/authentication/registration_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -125,7 +126,8 @@ class _LoginPageState extends State<LoginPage> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              // Add sign in logic here
+              // Add sign in logic here\
+              Navigator.push(context, MaterialPageRoute(builder: (builder) => const RegistrationPage()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
