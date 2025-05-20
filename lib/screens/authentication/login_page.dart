@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
               const Spacer(),
               buildAppLogo(),
               const SizedBox(height: 50),
-              _isAdministratorLogin
+              !_isAdministratorLogin
                   ? buildLoginFields()
                   : buildRegistrationFields(),
               const Spacer(),
