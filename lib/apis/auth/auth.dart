@@ -36,7 +36,7 @@ class AuthApi {
     }
   }
 
-  void login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     _init();
     var hashPasswordString = hashPassword(password);
     try {
@@ -45,32 +45,40 @@ class AuthApi {
         data: {'email': email, 'hashed_password': hashPasswordString},
       );
       log('Login successful from API: ${response.data}');
-    } catch (e) {
-      log('Login failed: $e');
-    }
+    } on DioException catch (e) {
+    log('Registration failed: ${e.response?.data}');
+    throw Exception(e.response?.data ?? e.message);
+  } on Exception catch (e) {
+    log('Registration failed: $e');
+    rethrow;
+  }
   }
 
-  void register(
-    String email,
-    String password,
-    String name, {
-    String fcmToken = 'abc',
-  }) async {
-    _init();
-    var hashPasswordString = hashPassword(password);
-    try {
-      final response = await dio.post(
-        registerUrl,
-        data: {
-          'email': email,
-          'hashed_password': hashPasswordString,
-          'name': name,
-          'fcm_token': fcmToken,
-        },
-      );
-      log('Registration successful from API: ${response.data}');
-    } catch (e) {
-      log('Registration failed: $e');
-    }
+Future<void> register(
+  String email,
+  String password,
+  String name, {
+  String fcmToken = 'abc',
+}) async {
+  _init();
+  var hashPasswordString = hashPassword(password);
+  try {
+    final response = await dio.post(
+      registerUrl,
+      data: {
+        'email': email,
+        'hashed_password': hashPasswordString,
+        'name': name,
+        'fcm_token': fcmToken,
+      },
+    );
+    log('Registration successful from API: ${response.data}');
+  } on DioException catch (e) {
+    log('Registration failed: ${e.response?.data}');
+    throw Exception(e.response?.data ?? e.message);
+  } on Exception catch (e) {
+    log('Registration failed: $e');
+    rethrow;
   }
+}
 }

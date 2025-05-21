@@ -56,7 +56,18 @@ class _LoginPageState extends State<LoginPage> {
               context: context,
               style: ToastificationStyle.flatColored,
             );
-          } else if (state is RegistrationSuccessState) {
+          } else if (state is RegistrationErrorState) {
+            clearControllers();
+            Navigator.of(context).pop();
+            toastification.show(
+              title: Text(state.error),
+              autoCloseDuration: const Duration(seconds: 2),
+              type: ToastificationType.error,
+              context: context,
+              style: ToastificationStyle.flatColored,
+            );
+          } 
+          else if (state is RegistrationSuccessState) {
             Navigator.of(context).pop();
             clearControllers();
             toastification.show(
