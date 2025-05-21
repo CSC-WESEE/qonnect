@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:qonnect/utils/handlers/password_encryption.dart';
+import 'package:qonnect/utils/handlers/password_hashing.dart';
 
 class AuthApi {
   Dio dio = Dio();
@@ -19,17 +19,17 @@ class AuthApi {
     final securityContext = SecurityContext(withTrustedRoots: false);
     securityContext.setTrustedCertificatesBytes(sslCert.buffer.asUint8List());
     dio.httpClientAdapter = IOHttpClientAdapter(
-    createHttpClient: () {
-      return HttpClient(context: securityContext)
-        ..badCertificateCallback = (cert, host, port) {
-          // Optional: Add custom host validation if needed
-          return true; // or false to reject
-        };
-    },
-  );
+      createHttpClient: () {
+        return HttpClient(context: securityContext)
+          ..badCertificateCallback = (cert, host, port) {
+            // Optional: Add custom host validation if needed
+            return true; // or false to reject
+          };
+      },
+    );
   }
 
-   void _init() {
+  void _init() {
     createSecureDio();
     if (baseUrl == null) {
       throw Exception('Base URL is not set in .env file');
