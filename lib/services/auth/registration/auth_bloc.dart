@@ -4,24 +4,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/apis/auth/auth.dart';
 import 'package:qonnect/services/auth/registration/auth_events.dart';
 import 'package:qonnect/services/auth/registration/auth_state.dart';
+import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 
 class AuthBloc extends Bloc<AuthEvents, AuthState> {
   AuthBloc() : super(LoginInitialState()) {
     on<LoginInitiatedEvent>((event, emit) async {
       emit(LoginLoadingState());
       try {
-        await AuthApi()
-            .login(event.email, event.password)
-            .then((value) {
-              log("Login successful from API: ");
-              emit(LoginSuccessState('Registration successful!'));
-            })
-            .onError((error, stackTrace) {
-              log("Login failed from API: $error");
-              emit(LoginErrorState(error.toString()));
-            });
+        var response = await AuthApi().login(event.email, event.password);
+        FlutterSecureStorageHandler flutterSecureStorageHandler =
+            FlutterSecureStorageHandler();
+
+        await flutterSecureStorageHandler.secureStorage!.write(
+          key: 'token',
+          value: response.data['token'],
+        );
+
+        var token = await flutterSecureStorageHandler.secureStorage!.read(key: 'token');
+
+        
+        emit(LoginSuccessState('Login successful!', token.toString()));
       } catch (e) {
-        log("cought in login bloc");
         emit(LoginErrorState(e.toString()));
       }
     });

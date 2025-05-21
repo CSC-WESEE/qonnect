@@ -5,46 +5,35 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:qonnect/utils/handlers/password_hashing.dart';
 
 class AuthApi {
-  Dio dio = Dio();
+  
+
+  DioHandler dioHandler = DioHandler();
 
   static String? baseUrl = dotenv.env['CONNECTION_URL'];
   static String get loginUrl => '$baseUrl/api/auth/login';
   static String get registerUrl => '$baseUrl/api/auth/register';
 
-  void createSecureDio() async {
-    final sslCert = await rootBundle.load('rootCA.crt');
-    final securityContext = SecurityContext(withTrustedRoots: false);
-    securityContext.setTrustedCertificatesBytes(sslCert.buffer.asUint8List());
-    dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () {
-        return HttpClient(context: securityContext)
-          ..badCertificateCallback = (cert, host, port) {
-            // Optional: Add custom host validation if needed
-            return true; // or false to reject
-          };
-      },
-    );
-  }
-
   void _init() {
-    createSecureDio();
     if (baseUrl == null) {
       throw Exception('Base URL is not set in .env file');
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<Response> login(String email, String password) async {
     _init();
     var hashPasswordString = hashPassword(password);
     try {
-      final response = await dio.post(
+      final response = await dioHandler.dio.post(
         loginUrl,
         data: {'email': email, 'hashed_password': hashPasswordString},
       );
       log('Login successful from API: ${response.data}');
+      return response;
+
     } on DioException catch (e) {
     log('Registration failed: ${e.response?.data}');
     throw Exception(e.response?.data ?? e.message);
@@ -63,7 +52,7 @@ Future<void> register(
   _init();
   var hashPasswordString = hashPassword(password);
   try {
-    final response = await dio.post(
+    final response = await dioHandler.dio.post(
       registerUrl,
       data: {
         'email': email,

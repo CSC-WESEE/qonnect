@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:qonnect/services/auth/registration/auth_bloc.dart';
 import 'package:qonnect/services/auth/registration/auth_events.dart';
 import 'package:qonnect/services/auth/registration/auth_state.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:toastification/toastification.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,81 +25,83 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.deepPurple,
-      body: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is LoginLoadingState || state is RegistrationLoadingState) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder:
-                  (context) => const Center(child: CircularProgressIndicator()),
-            );
-          } else if (state is LoginSuccessState) {
-            clearControllers();
-            Navigator.of(context).pop();
-            toastification.show(
-              title: const Text('Login Successful'),
-              autoCloseDuration: const Duration(seconds: 2),
-              type: ToastificationType.success,
-              context: context,
-              style: ToastificationStyle.flatColored,
-            );
-            GoRouter.of(context).go('/dashboard');
-          } else if (state is LoginErrorState) {
-            clearControllers();
-            Navigator.of(context).pop();
-            toastification.show(
-              title: Text(state.error),
-              autoCloseDuration: const Duration(seconds: 2),
-              type: ToastificationType.error,
-              context: context,
-              style: ToastificationStyle.flatColored,
-            );
-          } else if (state is RegistrationErrorState) {
-            clearControllers();
-            Navigator.of(context).pop();
-            toastification.show(
-              title: Text(state.error),
-              autoCloseDuration: const Duration(seconds: 2),
-              type: ToastificationType.error,
-              context: context,
-              style: ToastificationStyle.flatColored,
-            );
-          } 
-          else if (state is RegistrationSuccessState) {
-            Navigator.of(context).pop();
-            clearControllers();
-            toastification.show(
-              title: const Text('Registration Successful'),
-              autoCloseDuration: const Duration(seconds: 2),
-              type: ToastificationType.success,
-              context: context,
-              style: ToastificationStyle.flatColored,
-            );
-          }
-        },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "All Messages and Calls are truly end-to-end encrypted",
-                style: TextStyle(color: Colors.white, fontSize: 12),
-              ),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.deepPurple,
+        body: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is LoginLoadingState || state is RegistrationLoadingState) {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder:
+                    (context) => const Center(child: CircularProgressIndicator()),
+              );
+            } else if (state is LoginSuccessState) {
+              clearControllers();
+              Navigator.of(context).pop();
+              toastification.show(
+                title:  Text(state.token),
+                autoCloseDuration: const Duration(seconds: 2),
+                type: ToastificationType.success,
+                context: context,
+                style: ToastificationStyle.flatColored,
+              );
+              GoRouter.of(context).go('/dashboard');
+            } else if (state is LoginErrorState) {
+              clearControllers();
+              Navigator.of(context).pop();
+              toastification.show(
+                title: Text(state.error),
+                autoCloseDuration: const Duration(seconds: 2),
+                type: ToastificationType.error,
+                context: context,
+                style: ToastificationStyle.flatColored,
+              );
+            } else if (state is RegistrationErrorState) {
+              clearControllers();
+              Navigator.of(context).pop();
+              toastification.show(
+                title: Text(state.error),
+                autoCloseDuration: const Duration(seconds: 2),
+                type: ToastificationType.error,
+                context: context,
+                style: ToastificationStyle.flatColored,
+              );
+            } 
+            else if (state is RegistrationSuccessState) {
+              Navigator.of(context).pop();
+              clearControllers();
+              toastification.show(
+                title: const Text('Registration Successful'),
+                autoCloseDuration: const Duration(seconds: 2),
+                type: ToastificationType.success,
+                context: context,
+                style: ToastificationStyle.flatColored,
+              );
+            }
+          },
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "All Messages and Calls are truly end-to-end encrypted",
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
               const Spacer(),
-              buildAppLogo(),
-              const SizedBox(height: 50),
-              !_isAdministratorLogin
-                  ? buildLoginFields()
-                  : buildRegistrationFields(),
-              const Spacer(),
-              Text(
-                "Designed and Developed at WESEE",
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ],
+                buildAppLogo(),
+                const SizedBox(height: 50),
+                !_isAdministratorLogin
+                    ? buildLoginFields()
+                    : buildRegistrationFields(),
+                const Spacer(),
+                Text(
+                  "Designed and Developed at WESEE",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -143,7 +146,9 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget buildLoginFields() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 300),
+      padding:  Device.orientation == Orientation.portrait
+          ? const EdgeInsets.symmetric(horizontal: 100)
+          : const EdgeInsets.symmetric(horizontal: 300),
       child: Column(
         children: [
           TextField(
