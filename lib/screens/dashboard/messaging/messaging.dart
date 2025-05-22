@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qonnect/services/address_book/address_bloc.dart';
+import 'package:qonnect/services/address_book/address_book_events.dart';
 class Messaging extends StatefulWidget {
   const Messaging({super.key});
 
@@ -164,6 +167,13 @@ class _MessagingState extends State<Messaging> {
   }
 
   Widget buildMessageScreenForPortrait() {
-    return Scaffold();
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.large(onPressed: (){
+        context.read<AddressBloc>().add(AddressBookFetchEvent());
+      },
+      child: Icon(Icons.perm_contact_cal_outlined),
+      
+      ),
+    );
   }
 }

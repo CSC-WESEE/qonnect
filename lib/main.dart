@@ -3,11 +3,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:go_router/go_router.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
+import 'package:qonnect/services/address_book/address_bloc.dart';
 import 'package:qonnect/services/auth/authentication_repository.dart';
 import 'package:qonnect/services/auth/registration/auth_bloc.dart';
+import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {
@@ -18,9 +19,13 @@ void main() async {
       providers: [
         RepositoryProvider(create: (context) => AuthenticationRepository()),
         RepositoryProvider(create: (context) => RouterHandler()),
+        RepositoryProvider(create: (context) => DioHandler(),)
       ],
       child: MultiBlocProvider(
-        providers: [BlocProvider(create: (context) => AuthBloc())],
+        providers: [
+          BlocProvider(create: (context) => AuthBloc()),
+          BlocProvider(create: (context) => AddressBloc()),
+        ],
         child: const RootWidget(),
       ),
     ),
