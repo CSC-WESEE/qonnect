@@ -19,7 +19,6 @@ class DioHandler {
   Dio dio =
       Dio()
         ..options.baseUrl = '${dotenv.env['CONNECTION_URL']}'
-        ..options.headers['Content-Type'] = 'application/json'
         ..options.headers['Authorization'] = 'Bearer $token';
 
   DioHandler() {

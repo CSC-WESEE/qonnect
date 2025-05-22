@@ -1,7 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qonnect/routes/router.dart';
+import 'package:qonnect/routes/routes.dart';
+import 'package:qonnect/services/auth/authentication_repository.dart';
 import 'package:qonnect/services/auth/registration/auth_bloc.dart';
 import 'package:toastification/toastification.dart';
 
@@ -9,9 +14,15 @@ void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    MultiBlocProvider(
-      providers: [BlocProvider(create: (context) => AuthBloc())],
-      child: const RootWidget(),
+    MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(create: (context) => AuthenticationRepository()),
+        RepositoryProvider(create: (context) => RouterHandler()),
+      ],
+      child: MultiBlocProvider(
+        providers: [BlocProvider(create: (context) => AuthBloc())],
+        child: const RootWidget(),
+      ),
     ),
   );
 }
@@ -24,16 +35,34 @@ class RootWidget extends StatefulWidget {
 }
 
 class _RootWidgetState extends State<RootWidget> {
+  late final AuthenticationRepository _authRepository;
+  late final RouterHandler _routerHandler;
+
+  @override
+  void initState() {
+    super.initState();
+    _authRepository = context.read<AuthenticationRepository>();
+    _routerHandler = context.read<RouterHandler>();
+    _authRepository.status.listen((status) {
+      log(status.toString(), name: "Status");
+      if (status == AuthenticationStatus.authenticated) {
+        _routerHandler.router.go(Routes.dashboard);
+      } else {
+        _routerHandler.router.go(Routes.loginPage);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ToastificationWrapper(
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
-        routerConfig: RouterHandler().router,
+        routerConfig: _routerHandler.router, // Use the same instance
         title: 'Qonnect',
         theme: ThemeData(
           canvasColor: Colors.deepPurple,
-          appBarTheme: AppBarTheme(color: Colors.deepPurple),
+          appBarTheme: const AppBarTheme(color: Colors.deepPurple),
           primarySwatch: Colors.deepPurple,
         ),
       ),
