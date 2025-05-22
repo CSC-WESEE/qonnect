@@ -2,11 +2,12 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:qonnect/utils/handlers/password_hashing.dart';
 
 class AuthApi {
-  DioHandler dioHandler = DioHandler();
+  final dioHandler = getIt<DioHandler>();
 
   static String? baseUrl = dotenv.env['CONNECTION_URL'];
   static String get loginUrl => '$baseUrl/api/auth/login';
