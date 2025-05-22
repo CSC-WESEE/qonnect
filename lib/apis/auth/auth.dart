@@ -25,7 +25,7 @@ class AuthApi {
     var hashPasswordString = hashPassword(password);
     try {
       final response = await dioHandler.dio.post(
-        loginUrl,
+        '/api/auth/login',
         data: {'email': email, 'hashed_password': hashPasswordString},
       );
       log('Login successful from API: ${response.data}');
@@ -50,7 +50,7 @@ Future<void> register(
   var hashPasswordString = hashPassword(password);
   try {
     final response = await dioHandler.dio.post(
-      registerUrl,
+      '/api/auth/register',
       data: {
         'email': email,
         'hashed_password': hashPasswordString,
