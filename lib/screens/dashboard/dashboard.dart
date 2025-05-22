@@ -1,10 +1,14 @@
 import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 import 'package:qonnect/screens/dashboard/meetings/meetings.dart';
 import 'package:qonnect/screens/dashboard/messaging/messaging.dart';
+import 'package:qonnect/utils/LocalDB/local_db.dart';
+
+List<Map<String, dynamic>> userInfo = [];
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -15,6 +19,17 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard>  {  
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    getOwnerInfo();
+  }
+
+  void getOwnerInfo() async {
+    userInfo = await DBHelper.getOwnerInfo();
+    log(userInfo.toString(), name: "User Info");
+  }
 
   final List<Widget> _pages = [
     HomePage(),
