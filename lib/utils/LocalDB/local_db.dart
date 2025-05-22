@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'package:path_provider/path_provider.dart';
 import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
-
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqlFFi;
 
 class DBHelper {
   static Database? _database;
@@ -17,8 +17,10 @@ class DBHelper {
     const chars =
         'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final math.Random random = math.Random.secure();
-    return List.generate(length, (index) => chars[random.nextInt(chars.length)])
-        .join();
+    return List.generate(
+      length,
+      (index) => chars[random.nextInt(chars.length)],
+    ).join();
   }
 
   // Initialize the database
@@ -27,52 +29,94 @@ class DBHelper {
 
     // String path = join(await getDatabasesPath(), 'chat_database.db');
     // print("Path: $path");
-    final directory = await getExternalStorageDirectory();
+    final directory =
+        Platform.isAndroid
+            ? await getExternalStorageDirectory()
+            : await getApplicationDocumentsDirectory();
     final path = '${directory?.path}/databases/chat_database.db';
     final file = File(path);
     log("Path: $path");
 
     dbPassword = await secureStorage.read(key: 'encryptionPassword');
-    if (dbPassword == null  || dbPassword.isEmpty) {
+    if (dbPassword == null || dbPassword.isEmpty) {
       dbPassword = generateRandomString(16);
       await secureStorage.write(key: 'encryptionPassword', value: dbPassword);
     }
 
     // Open the database with encryption password
-    _database = await openDatabase(
-      path,
-      // password: '1234',
-      password: dbPassword,
-      onCreate: (db, version) async {
-        await db.execute(
-            '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''');
-        await db.execute(
-            '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''');
-        await db.execute(
-            'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, icon TEXT)');
-        await db.execute(
-            'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )');
-        await db.execute(
-            'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)');
-        await db.execute(
-            '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''');
-        // await db.execute('CREATE TABLE calllogs()');
-      },
-      version: 1,
-    ).onError((error, _) {
-      throw error.toString();
-    });
+    _database =
+        Platform.isLinux
+            ? await sqlFFi.databaseFactoryFfi
+                .openDatabase(
+                  path,
+                  // password: '1234',
+                  options: sqlFFi.OpenDatabaseOptions(
+                    version: 1,
+                    onCreate: (db, version) async {
+                      await db.execute(
+                        'CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+                      );
+                      await db.execute(
+                        '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+                      );
+                      await db.execute(
+                        'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, icon TEXT)',
+                      );
+                      await db.execute(
+                        'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
+                      );
+                      await db.execute(
+                        'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+                      );
+                      await db.execute(
+                        '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
+                      );
+                      // await db.execute('CREATE TABLE calllogs()');
+                    },
+                  ),
+                )
+                .onError((error, _) {
+                  throw error.toString();
+                })
+            : await openDatabase(
+              path,
+              // password: '1234',
+              password: dbPassword,
+              onCreate: (db, version) async {
+                await db.execute(
+                  '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
+                );
+                await db.execute(
+                  '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+                );
+                await db.execute(
+                  'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, icon TEXT)',
+                );
+                await db.execute(
+                  'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
+                );
+                await db.execute(
+                  'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+                );
+                await db.execute(
+                  '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
+                );
+                // await db.execute('CREATE TABLE calllogs()');
+              },
+              version: 1,
+            ).onError((error, _) {
+              throw error.toString();
+            });
     return _database!;
   }
 
   // For ownerInfo table
   static Future<int> insertOwnerUserID(int userid) async {
     final db = await initDB();
-    int id = await db.insert(
-      'ownerInfo',
-      {'userID': userid, 'icon': ''},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    int id = await db.insert('ownerInfo', {
+      'userID': userid,
+      'icon': '',
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
 
@@ -81,17 +125,23 @@ class DBHelper {
     final db = await initDB();
     log("Username from Setup profile page: $name");
     try {
-      int count = await db.rawUpdate('''
+      int count = await db.rawUpdate(
+        '''
       UPDATE ownerInfo 
       SET userName = ?, icon =? 
       WHERE userID = ?
-      ''', [name, icon, id]);
+      ''',
+        [name, icon, id],
+      );
       log(count.toString(), name: "Number of rows updated in OwnerInfo table");
       // Fetch and print the updated row
-      List<Map<String, dynamic>> result = await db.rawQuery('''
+      List<Map<String, dynamic>> result = await db.rawQuery(
+        '''
     SELECT * FROM ownerInfo 
     WHERE userID = ?
-    ''', [id]);
+    ''',
+        [id],
+      );
 
       if (result.isNotEmpty) {
         log("Updated row: ${result.first}");
@@ -106,22 +156,16 @@ class DBHelper {
   // For ownerInfo table
   static Future<List<Map<String, dynamic>>> getOwnerInfo() async {
     final db = await initDB();
-    return await db.query(
-      'ownerInfo',
-    );
+    return await db.query('ownerInfo');
   }
 
   // For contacts table
   static Future<int> insertContact(String name, int recID) async {
     final db = await initDB();
-    int id = await db.insert(
-      'contacts',
-      {
-        'name': name,
-        'recID': recID,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    int id = await db.insert('contacts', {
+      'name': name,
+      'recID': recID,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     log("recent contacts added");
     return id;
   }
@@ -143,38 +187,37 @@ class DBHelper {
 
   // For messages table ----- Insert a message into the database
   static Future<int> insertMessage(
-      String sender,
-      String receiver,
-      String message,
-      String path,
-      String messageType,
-      String uuidId,
-      String timestamp,
-      String messageId,
-      String messageReaction) async {
+    String sender,
+    String receiver,
+    String message,
+    String path,
+    String messageType,
+    String uuidId,
+    String timestamp,
+    String messageId,
+    String messageReaction,
+  ) async {
     final db = await initDB();
-    int id = await db.insert(
-      'messages',
-      {
-        'sender': sender,
-        'receiver': receiver,
-        'message': message,
-        'path': path,
-        'message_type': messageType,
-        'uuidId': uuidId,
-        'timestamp': timestamp,
-        'message_id': messageId,
-        'message_reaction': messageReaction
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    int id = await db.insert('messages', {
+      'sender': sender,
+      'receiver': receiver,
+      'message': message,
+      'path': path,
+      'message_type': messageType,
+      'uuidId': uuidId,
+      'timestamp': timestamp,
+      'message_id': messageId,
+      'message_reaction': messageReaction,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     log("Message added successfully");
     return id;
   }
 
   // For messages table ----- Fetch messages between two users
   static Future<List<Map<String, dynamic>>> getMessages(
-      String currentUserId, String peerId) async {
+    String currentUserId,
+    String peerId,
+  ) async {
     final db = await initDB();
     return await db.query(
       'messages',
@@ -186,24 +229,32 @@ class DBHelper {
 
   // For messages table
   static Future<void> updateMessageWithId(
-      String messageId, String uuidId) async {
+    String messageId,
+    String uuidId,
+  ) async {
     final db = await initDB();
     log("Updating message with ID: $messageId");
 
     try {
-      int count = await db.rawUpdate('''
+      int count = await db.rawUpdate(
+        '''
       UPDATE messages 
       SET message_id = ? 
       WHERE uuidId = ?
-      ''', [messageId, uuidId]);
+      ''',
+        [messageId, uuidId],
+      );
       log("Number of rows updated: $count");
     } catch (error) {
       log("The error in updating message_id is: $error");
     }
-    List<Map<String, dynamic>> res = await db.rawQuery('''
+    List<Map<String, dynamic>> res = await db.rawQuery(
+      '''
     SELECT * FROM messages
     WHERE uuidId = ?
-    ''', [uuidId]);
+    ''',
+      [uuidId],
+    );
     if (res.isNotEmpty) {
       log("Row after update: $res");
     } else {
@@ -213,15 +264,20 @@ class DBHelper {
 
   // For messages table
   static Future<void> updateMessagesWithReaction(
-      String messageReaction, String uuidId) async {
+    String messageReaction,
+    String uuidId,
+  ) async {
     final db = await initDB();
     log("Updating message with Reaction $messageReaction");
     try {
-      int count = await db.rawUpdate('''
+      int count = await db.rawUpdate(
+        '''
           UPDATE messages
           SET message_reaction = ?
           WHERE uuidId = ?
-       ''', [messageReaction, uuidId]);
+       ''',
+        [messageReaction, uuidId],
+      );
       log("Number of rows updated due to message reaction $count");
     } catch (error) {
       log("Updating messages reaction cought an error ${error.toString()}");
@@ -239,11 +295,7 @@ class DBHelper {
     log("Inside delete function");
     final db = await initDB();
     try {
-      await db.delete(
-        'messages',
-        where: 'id = ?',
-        whereArgs: [messageId],
-      );
+      await db.delete('messages', where: 'id = ?', whereArgs: [messageId]);
     } catch (error) {
       log("The error in deletion is: $error");
     }
@@ -251,14 +303,19 @@ class DBHelper {
 
   // For messages table
   static Future<void> updateFilePath(
-      String temporaryFilePath, permanentFilePath) async {
+    String temporaryFilePath,
+    permanentFilePath,
+  ) async {
     final db = await initDB();
     try {
-      await db.rawUpdate('''
+      await db.rawUpdate(
+        '''
           UPDATE messages
           SET path = ?
           WHERE path = ?
-       ''', [permanentFilePath, temporaryFilePath]);
+       ''',
+        [permanentFilePath, temporaryFilePath],
+      );
     } catch (error) {
       log("Error in updating the file path: $error");
     }
@@ -297,7 +354,7 @@ class DBHelper {
         {
           'message': 'You deleted this message',
           'path': '',
-          'message_type': 'text'
+          'message_type': 'text',
         },
         where: 'id = ?',
         whereArgs: [messageId],
@@ -329,39 +386,56 @@ class DBHelper {
   }
 
   // For contacts table
-  static Future<void> updateContactsWithLastMsg(int receiverId, String name,
-      String lastMessage, String timeStamp, int isSender) async {
+  static Future<void> updateContactsWithLastMsg(
+    int receiverId,
+    String name,
+    String lastMessage,
+    String timeStamp,
+    int isSender,
+  ) async {
     final db = await initDB();
     log("Processing contact with ID: $receiverId");
 
     try {
       // Check if the user already exists in the table
-      List<Map<String, dynamic>> existingContact = await db.rawQuery('''
+      List<Map<String, dynamic>> existingContact = await db.rawQuery(
+        '''
     SELECT * FROM contacts 
     WHERE recID = ?
-    ''', [receiverId]);
+    ''',
+        [receiverId],
+      );
 
       if (existingContact.isNotEmpty) {
-        int count = await db.rawUpdate('''
+        int count = await db.rawUpdate(
+          '''
       UPDATE contacts 
       SET lastMsg = ?, timeStamp = ?, isSender = ?
       WHERE recID = ?
-      ''', [lastMessage, timeStamp, isSender, receiverId]);
+      ''',
+          [lastMessage, timeStamp, isSender, receiverId],
+        );
         log("Number of rows updated: $count");
       } else {
-        int id = await db.rawInsert('''
+        int id = await db.rawInsert(
+          '''
       INSERT INTO contacts (recID, name, lastMsg, timeStamp, isSender)
       VALUES (?, ?, ?, ?, ?)
-      ''', [receiverId, name, lastMessage, timeStamp, isSender]);
+      ''',
+          [receiverId, name, lastMessage, timeStamp, isSender],
+        );
         log("Inserted new contact with ID: $id");
       }
     } catch (error) {
       log("The error in updating message_id is: $error");
     }
-    List<Map<String, dynamic>> result = await db.rawQuery('''
+    List<Map<String, dynamic>> result = await db.rawQuery(
+      '''
     SELECT * FROM contacts 
     WHERE recID = ?
-    ''', [receiverId]);
+    ''',
+      [receiverId],
+    );
 
     if (result.isNotEmpty) {
       log("Updated row: ${result.first}");
@@ -384,20 +458,26 @@ class DBHelper {
     // }
     try {
       log(status, name: "Message status inside DB update function");
-      int count = await db.rawUpdate('''
+      int count = await db.rawUpdate(
+        '''
       UPDATE messages 
       SET message_status = ?
       WHERE uuidId = ?
-      ''', [status, uuId]);
+      ''',
+        [status, uuId],
+      );
       log("Number of rows updated for message_staus: $count");
     } catch (error) {
       log("The error in updating message_staus is: $error");
     }
 
-    List<Map<String, dynamic>> res = await db.rawQuery('''
+    List<Map<String, dynamic>> res = await db.rawQuery(
+      '''
     SELECT * FROM messages
     WHERE uuidId = ?
-    ''', [uuId]);
+    ''',
+      [uuId],
+    );
     if (res.isNotEmpty) {
       log("Row after update11111111111111111111111111: $res");
     } else {
@@ -408,11 +488,14 @@ class DBHelper {
   static Future<void> updateMessageStatusReceivedToRead(String sender) async {
     final db = await initDB();
     try {
-      int count = await db.rawUpdate('''
+      int count = await db.rawUpdate(
+        '''
       UPDATE messages 
       SET message_status = ? 
       WHERE message_status = ? AND sender = ?
-    ''', ['read', 'received', sender]);
+    ''',
+        ['read', 'received', sender],
+      );
       log("Number of rows updated for message_status: $count");
     } catch (error, stackTrace) {
       log("Error updating message_status: $error");
@@ -421,15 +504,21 @@ class DBHelper {
   }
 
   static Future<void> updateMessageStatusDeliveredToRead(
-      String receiver) async {
+    String receiver,
+  ) async {
     final db = await initDB();
     try {
-      int count = await db.rawUpdate('''
+      int count = await db.rawUpdate(
+        '''
       UPDATE messages 
       SET message_status = ? 
       WHERE message_status = ? AND receiver = ?
-    ''', ['read', 'delivered', receiver]);
-      log("Number of rows updated for message_status in updateMessageStatusDeliveredToRead function: $count");
+    ''',
+        ['read', 'delivered', receiver],
+      );
+      log(
+        "Number of rows updated for message_status in updateMessageStatusDeliveredToRead function: $count",
+      );
     } catch (error, stackTrace) {
       log("Error updating message_status: $error");
       log("StackTrace: $stackTrace");
@@ -440,13 +529,14 @@ class DBHelper {
   // 0 - Audio Call and 1 - Video Call
   // 0 - Missed Call, 1 - Outgoing Call, 2- Incoming Call
   static Future<void> insertCalls(
-      String callerId,
-      String receiverId,
-      String receiverName,
-      String timeStamp,
-      String roomId,
-      bool callType,
-      int callStatus) async {
+    String callerId,
+    String receiverId,
+    String receiverName,
+    String timeStamp,
+    String roomId,
+    bool callType,
+    int callStatus,
+  ) async {
     final db = await initDB();
     int callTypeinBool;
     if (callType) {
@@ -455,19 +545,15 @@ class DBHelper {
       callTypeinBool = 0;
     }
     try {
-      await db.insert(
-        'callDetails',
-        {
-          'callerId': callerId,
-          'receiverId': receiverId,
-          'receiverName': receiverName,
-          'call_type': callTypeinBool,
-          'roomId': roomId,
-          'start_call_timestamp': timeStamp,
-          'call_status': callStatus,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert('callDetails', {
+        'callerId': callerId,
+        'receiverId': receiverId,
+        'receiverName': receiverName,
+        'call_type': callTypeinBool,
+        'roomId': roomId,
+        'start_call_timestamp': timeStamp,
+        'call_status': callStatus,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       // log("callDetails table updated with id: $id");
     } catch (error) {
       log("The error in inserting call in the callDetails table is: $error");
@@ -477,51 +563,48 @@ class DBHelper {
   // For callDetails table ----- Fetch calls between two users
   static Future<List<Map<String, dynamic>>> getCalls() async {
     final db = await initDB();
-    return await db.query(
-      'callDetails',
-      orderBy: 'start_call_timestamp DESC',
-    );
+    return await db.query('callDetails', orderBy: 'start_call_timestamp DESC');
   }
 
   // For Group Functionality
   static Future<void> insertGroupDetails(
-      String roomId,
-      String groupName,
-      String lastMsg,
-      String timeStamp,
-      int isSender,
-      String participants,
-      String sender) async {
+    String roomId,
+    String groupName,
+    String lastMsg,
+    String timeStamp,
+    int isSender,
+    String participants,
+    String sender,
+  ) async {
     final db = await initDB();
     try {
-      await db.insert(
-        'groupDetails',
-        {
-          'roomId': roomId,
-          'participants': participants,
-          'groupName': groupName,
-          'lastMsg': lastMsg,
-          'timeStamp': timeStamp,
-          'isSender': isSender,
-          // 'admins': adminList,
-          'sender': sender,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert('groupDetails', {
+        'roomId': roomId,
+        'participants': participants,
+        'groupName': groupName,
+        'lastMsg': lastMsg,
+        'timeStamp': timeStamp,
+        'isSender': isSender,
+        // 'admins': adminList,
+        'sender': sender,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       // log("callDetails table updated with id: $id");
     } catch (error) {
-      log("The error in inserting group details in the groupDetails table is: $error");
+      log(
+        "The error in inserting group details in the groupDetails table is: $error",
+      );
     }
   }
 
   static Future<void> updateGroupDetailsWithLastMessage(
-      String roomId,
-      String groupName,
-      String lastMsg,
-      String timeStamp,
-      int isSender,
-      String participants,
-      String sender) async {
+    String roomId,
+    String groupName,
+    String lastMsg,
+    String timeStamp,
+    int isSender,
+    String participants,
+    String sender,
+  ) async {
     final db = await initDB();
     try {
       await db.update(
@@ -540,50 +623,47 @@ class DBHelper {
       log("Last entry in groupDetails updated successfully.");
       // log("callDetails table updated with id: $id");
     } catch (error) {
-      log("The error in updating group details in the groupDetails table is: $error");
+      log(
+        "The error in updating group details in the groupDetails table is: $error",
+      );
     }
   }
 
   static Future<List<Map<String, dynamic>>> getGroups() async {
     final db = await initDB();
-    return await db.query(
-      'groupDetails',
-      orderBy: 'timestamp DESC',
-    );
+    return await db.query('groupDetails', orderBy: 'timestamp DESC');
   }
 
   static Future<int> insertGroupMessage(
-      String roomId,
-      String sender,
-      String receivers,
-      String message,
-      String path,
-      String messageType,
-      String uuidId,
-      String timestamp,
-      String messageReaction) async {
+    String roomId,
+    String sender,
+    String receivers,
+    String message,
+    String path,
+    String messageType,
+    String uuidId,
+    String timestamp,
+    String messageReaction,
+  ) async {
     final db = await initDB();
-    int id = await db.insert(
-      'groupMessages',
-      {
-        'roomId': roomId,
-        'sender': sender,
-        'participants': receivers,
-        'message': message,
-        'path': path,
-        'message_type': messageType,
-        'uuid': uuidId,
-        'timestamp': timestamp,
-        'message_reaction': messageReaction
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    int id = await db.insert('groupMessages', {
+      'roomId': roomId,
+      'sender': sender,
+      'participants': receivers,
+      'message': message,
+      'path': path,
+      'message_type': messageType,
+      'uuid': uuidId,
+      'timestamp': timestamp,
+      'message_reaction': messageReaction,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
     log("Message added successfully in the groupMessages table");
     return id;
   }
 
   static Future<List<Map<String, dynamic>>> getGroupMessages(
-      String roomId) async {
+    String roomId,
+  ) async {
     final db = await initDB();
     return await db.query(
       'groupMessages',
@@ -595,17 +675,21 @@ class DBHelper {
 
   // For groupMessages table
   static Future<void> updateGroupFilePath(
-      String temporaryFilePath, permanentFilePath) async {
+    String temporaryFilePath,
+    permanentFilePath,
+  ) async {
     final db = await initDB();
     try {
-      await db.rawUpdate('''
+      await db.rawUpdate(
+        '''
           UPDATE groupMessages
           SET path = ?
           WHERE path = ?
-       ''', [permanentFilePath, temporaryFilePath]);
+       ''',
+        [permanentFilePath, temporaryFilePath],
+      );
     } catch (error) {
       log("Error in updating the file path: $error");
     }
   }
 }
-

@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qonnect/services/auth/registration/auth_bloc.dart';
-import 'package:qonnect/services/auth/registration/auth_events.dart';
-import 'package:qonnect/services/auth/registration/auth_state.dart';
+import 'package:qonnect/services/auth/auth/auth_bloc.dart';
+import 'package:qonnect/services/auth/auth/auth_events.dart';
+import 'package:qonnect/services/auth/auth/auth_state.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:toastification/toastification.dart';
 

@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/apis/auth/auth.dart';
-import 'package:qonnect/services/auth/registration/auth_events.dart';
-import 'package:qonnect/services/auth/registration/auth_state.dart';
+import 'package:qonnect/services/auth/auth/auth_events.dart';
+import 'package:qonnect/services/auth/auth/auth_state.dart';
 import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 
 class AuthBloc extends Bloc<AuthEvents, AuthState> {
@@ -15,12 +15,12 @@ class AuthBloc extends Bloc<AuthEvents, AuthState> {
         FlutterSecureStorageHandler flutterSecureStorageHandler =
             FlutterSecureStorageHandler();
 
-        await flutterSecureStorageHandler.secureStorage!.write(
+        await flutterSecureStorageHandler.secureStorage.write(
           key: 'token',
           value: response.data['token'],
         );
 
-        var token = await flutterSecureStorageHandler.secureStorage!.read(
+        var token = await flutterSecureStorageHandler.secureStorage.read(
           key: 'token',
         );
 
