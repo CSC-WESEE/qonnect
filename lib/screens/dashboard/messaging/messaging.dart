@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qonnect/routes/router.dart';
+import 'package:qonnect/routes/routes.dart';
 import 'package:qonnect/services/address_book/address_bloc.dart';
 import 'package:qonnect/services/address_book/address_book_events.dart';
 class Messaging extends StatefulWidget {
@@ -18,9 +20,7 @@ class _MessagingState extends State<Messaging> {
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, __) {
-        return (Platform.isAndroid && __ == Orientation.portrait)
-            ? buildMessageScreenForPortrait()
-            : buildMessageScreenForLandscape();
+        return  buildMessageScreenForPortrait();
       },
     );
   }
@@ -168,8 +168,8 @@ class _MessagingState extends State<Messaging> {
 
   Widget buildMessageScreenForPortrait() {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.large(onPressed: (){
-        context.read<AddressBloc>().add(AddressBookFetchEvent());
+      floatingActionButton: FloatingActionButton.large(onPressed: () {
+          context.read<RouterHandler>().router.push(Routes.users);
       },
       child: Icon(Icons.perm_contact_cal_outlined),
       

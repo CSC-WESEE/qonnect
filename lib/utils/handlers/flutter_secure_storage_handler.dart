@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FlutterSecureStorageHandler {
-  FlutterSecureStorage? secureStorage;
+late  FlutterSecureStorage secureStorage;
 
   FlutterSecureStorageHandler() {
     AndroidOptions getAndroidOptions() =>

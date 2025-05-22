@@ -10,7 +10,7 @@ class DioHandler {
   late Dio dio;
 
   Future<void> getJwtToken() async {
-    var fetchedToken = await FlutterSecureStorageHandler().secureStorage?.read(
+    var fetchedToken = await FlutterSecureStorageHandler().secureStorage.read(
       key: 'token',
     );
     token = fetchedToken ?? '';
