@@ -1,6 +1,10 @@
 import 'dart:io';
+// import 'dart:nativewrappers/_internal/vm/lib/math_patch.dart';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:qonnect/apis/address_book/address_book.dart';
+import 'package:qonnect/screens/dashboard/messaging/UserListPage.dart';
 
 class Messaging extends StatefulWidget {
   const Messaging({super.key});
@@ -156,7 +160,9 @@ class _MessagingState extends State<Messaging> {
   Widget buildMessageScreenForPortrait() {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          Navigator.push(context, MaterialPageRoute(builder: (builder) => UserListPage()));
+        },
         child: Icon(Icons.add),
       ),
     );
