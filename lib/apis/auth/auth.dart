@@ -1,9 +1,6 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:qonnect/utils/handlers/password_hashing.dart';

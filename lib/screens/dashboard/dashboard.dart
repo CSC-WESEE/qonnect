@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 import 'package:qonnect/screens/dashboard/meetings/meetings.dart';
 import 'package:qonnect/screens/dashboard/messaging/messaging.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -13,7 +13,7 @@ class Dashboard extends StatefulWidget {
   State<Dashboard> createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _DashboardState extends State<Dashboard>  {  
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
@@ -140,7 +140,7 @@ class _DashboardState extends State<Dashboard> {
                 labelTextStyle: WidgetStatePropertyAll(
                   TextStyle(
                     color: Colors.white,
-                    fontSize: 12.sp,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

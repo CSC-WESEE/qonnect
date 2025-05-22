@@ -1,9 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:qonnect/apis/address_book/address_book.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
-
 class Messaging extends StatefulWidget {
   const Messaging({super.key});
 
@@ -13,19 +10,20 @@ class Messaging extends StatefulWidget {
 
 class _MessagingState extends State<Messaging> {
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    AddressBookApi().getAddressBookUsers();
-  }
+  
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, __) {
         return (Platform.isAndroid && __ == Orientation.portrait)
             ? buildMessageScreenForPortrait()
-            : Row(
+            : buildMessageScreenForLandscape();
+      },
+    );
+  }
+
+  Widget buildMessageScreenForLandscape(){
+    return Row(
               children: [
                 // Left Sidebar
                 Container(
@@ -163,8 +161,6 @@ class _MessagingState extends State<Messaging> {
                 ),
               ],
             );
-      },
-    );
   }
 
   Widget buildMessageScreenForPortrait() {

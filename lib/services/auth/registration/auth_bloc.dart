@@ -20,9 +20,10 @@ class AuthBloc extends Bloc<AuthEvents, AuthState> {
           value: response.data['token'],
         );
 
-        var token = await flutterSecureStorageHandler.secureStorage!.read(key: 'token');
+        var token = await flutterSecureStorageHandler.secureStorage!.read(
+          key: 'token',
+        );
 
-        
         emit(LoginSuccessState('Login successful!', token.toString()));
       } catch (e) {
         emit(LoginErrorState(e.toString()));

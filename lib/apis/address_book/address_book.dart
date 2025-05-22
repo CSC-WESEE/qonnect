@@ -17,6 +17,7 @@ class AddressBookApi {
       log(response.data.toString());
       return response;
     } on DioException catch (e) {
+      log(e.toString());
       throw Exception(e.response?.data);
     } on Exception catch (e) {
       log('Registration failed: $e');

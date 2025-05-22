@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/services/auth/registration/auth_bloc.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (context) => AuthBloc())],
@@ -26,21 +26,17 @@ class RootWidget extends StatefulWidget {
 class _RootWidgetState extends State<RootWidget> {
   @override
   Widget build(BuildContext context) {
-    return ResponsiveSizer(
-      builder: (context, orientation, screenType) {
-        return ToastificationWrapper(
-          child: MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            routerConfig: RouterHandler().router,
-            title: 'Qonnect',
-            theme: ThemeData(
-              canvasColor: Colors.deepPurple,
-              appBarTheme: AppBarTheme(color: Colors.deepPurple),
-              primarySwatch: Colors.deepPurple,
-            ),
-          ),
-        );
-      }
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false,
+        routerConfig: RouterHandler().router,
+        title: 'Qonnect',
+        theme: ThemeData(
+          canvasColor: Colors.deepPurple,
+          appBarTheme: AppBarTheme(color: Colors.deepPurple),
+          primarySwatch: Colors.deepPurple,
+        ),
+      ),
     );
   }
 }
