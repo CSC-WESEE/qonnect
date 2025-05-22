@@ -3,24 +3,33 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:go_router/go_router.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
+import 'package:qonnect/service_locators/locators.dart';
+import 'package:qonnect/services/address_book/address_bloc.dart';
 import 'package:qonnect/services/auth/authentication_repository.dart';
 import 'package:qonnect/services/auth/registration/auth_bloc.dart';
+import 'package:qonnect/services/socket_connection/socket_service.dart';
+import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  await setupServiceLocator();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => AuthenticationRepository()),
-        RepositoryProvider(create: (context) => RouterHandler()),
+        RepositoryProvider(create: (context) => getIt<AuthenticationRepository>()),
+        RepositoryProvider(create: (context) => getIt<RouterHandler>()),
+        RepositoryProvider(create: (context) => getIt<DioHandler>(),),
+        RepositoryProvider(create: (context) => getIt<SocketService>(),)
       ],
       child: MultiBlocProvider(
-        providers: [BlocProvider(create: (context) => AuthBloc())],
+        providers: [
+          BlocProvider(create: (context) => AuthBloc()),
+          BlocProvider(create: (context) => AddressBloc()),
+        ],
         child: const RootWidget(),
       ),
     ),

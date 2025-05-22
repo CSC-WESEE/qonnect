@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/services.dart';
@@ -8,37 +7,35 @@ import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 
 class DioHandler {
   static String token = '';
+  late Dio dio;
 
-  Future<String> getJwtToken() async {
-    var token = await FlutterSecureStorageHandler().secureStorage?.read(
+  Future<void> getJwtToken() async {
+    var fetchedToken = await FlutterSecureStorageHandler().secureStorage.read(
       key: 'token',
     );
-    return token!;
+    token = fetchedToken ?? '';
   }
 
-  Dio dio =
-      Dio()
-        ..options.baseUrl = '${dotenv.env['CONNECTION_URL']}'
-        ..options.headers['Authorization'] = 'Bearer $token';
+  Future<void> initialize() async {
+    await getJwtToken();
+    dio = Dio()
+      ..options.baseUrl = '${dotenv.env['CONNECTION_URL']}'
+      ..options.headers['Authorization'] = 'Bearer $token';
+    await createSecureDio();
+  }
 
   DioHandler() {
-    createSecureDio();
-    getJwtToken().then((value) {
-      token = value;
-    });
+    initialize();
   }
 
-  void createSecureDio() async {
+  Future<void> createSecureDio() async {
     final sslCert = await rootBundle.load('rootCA.crt');
     final securityContext = SecurityContext(withTrustedRoots: false);
     securityContext.setTrustedCertificatesBytes(sslCert.buffer.asUint8List());
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         return HttpClient(context: securityContext)
-          ..badCertificateCallback = (cert, host, port) {
-            // Optional: Add custom host validation if needed
-            return true; // or false to reject
-          };
+          ..badCertificateCallback = (cert, host, port) => true;
       },
     );
   }

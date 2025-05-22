@@ -13,6 +13,7 @@ class AddressBookApi {
 
   Future<Response> getAddressBookUsers() async {
     try {
+      await dioHandler.initialize(); 
       final response = await dioHandler.dio.get(addressBookFetchUrl);
       log(response.data.toString());
       return response;

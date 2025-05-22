@@ -3,8 +3,11 @@ import 'dart:io';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:qonnect/apis/address_book/address_book.dart';
-import 'package:qonnect/screens/dashboard/messaging/UserListPage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qonnect/routes/router.dart';
+import 'package:qonnect/routes/routes.dart';
+import 'package:qonnect/services/address_book/address_bloc.dart';
+import 'package:qonnect/services/address_book/address_book_events.dart';
 
 class Messaging extends StatefulWidget {
   const Messaging({super.key});
@@ -18,9 +21,7 @@ class _MessagingState extends State<Messaging> {
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, __) {
-        return (Platform.isAndroid && __ == Orientation.portrait)
-            ? buildMessageScreenForPortrait()
-            : buildMessageScreenForLandscape();
+        return  buildMessageScreenForPortrait();
       },
     );
   }
@@ -159,11 +160,11 @@ class _MessagingState extends State<Messaging> {
 
   Widget buildMessageScreenForPortrait() {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          Navigator.push(context, MaterialPageRoute(builder: (builder) => UserListPage()));
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.large(onPressed: () {
+          context.read<RouterHandler>().router.push(Routes.users);
+      },
+      child: Icon(Icons.perm_contact_cal_outlined),
+      
       ),
     );
   }
