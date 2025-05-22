@@ -50,8 +50,8 @@ class _RootWidgetState extends State<RootWidget> {
   @override
   void initState() {
     super.initState();
-    _authRepository = context.read<AuthenticationRepository>();
-    _routerHandler = context.read<RouterHandler>();
+    _authRepository = getIt<AuthenticationRepository>();
+    _routerHandler = getIt<RouterHandler>();
     _authRepository.status.listen((status) {
       log(status.toString(), name: "Status");
       if (status == AuthenticationStatus.authenticated) {
