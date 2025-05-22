@@ -4,20 +4,27 @@ import 'package:qonnect/screens/authentication/login_page.dart';
 import 'package:qonnect/screens/dashboard/dashboard.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 
-final GoRouter router = GoRouter(
-  initialLocation: Routes.loginPage,
-  routes: [
-    GoRoute(
-      path: Routes.homePage,
-      name: Routes.homePage,
-      builder: (context, state) {
-        return const HomePage();
-      },
-    ),
-    GoRoute(
-      path: Routes.dashboard,
-      builder: (context, state) => const Dashboard(),
-    ),
-    GoRoute(path: Routes.loginPage, builder: (context, state) => LoginPage(),)
-  ],
-);
+class RouterHandler {
+ 
+
+  final GoRouter router = GoRouter(
+    initialLocation: Routes.dashboard,
+    routes: [
+      GoRoute(
+        path: Routes.homePage,
+        name: Routes.homePage,
+        builder: (context, state) {
+          return const HomePage();
+        },
+      ),
+      GoRoute(
+        path: Routes.dashboard,
+        builder: (context, state) => const Dashboard(),
+      ),
+      GoRoute(
+        path: Routes.loginPage, 
+        builder: (context, state) => LoginPage()
+      ),
+    ],
+  );
+}
