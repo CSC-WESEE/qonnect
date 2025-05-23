@@ -35,7 +35,7 @@ class ChatModel {
       name: json['name'],
       icon: json['icon'] ?? "",
       isGroup: json['isGroup'] ?? false,
-      time: modifyDateTimeValue(json['timeStamp']).toString() ,
+      time: "",
       currentMessage: json['lastMsg'] ?? "",
       id: json['recID'],
       isSender: json['isSender'],

@@ -1,9 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/models/address_book/users.dart';
+import 'package:qonnect/models/chat/chat_model.dart';
 import 'package:qonnect/models/chat/chat_model_repository.dart';
+import 'package:qonnect/routes/routes.dart';
 import 'package:qonnect/service_locators/locators.dart';
 
 class UserListPage extends StatefulWidget {
@@ -135,7 +138,7 @@ class _UserListPageState extends State<UserListPage> {
                         user.name!,
                         user.id!,
                       );
-                      Navigator.pop(context); // Add this line to go back to messaging screen
+                      GoRouter.of(context).push(Routes.individualPage, extra: ChatModel.fromJson({'name' : user.name, 'recID' : user.id}) ,); // Add this line to go back to messaging screen
                     },
                   );
                 },
