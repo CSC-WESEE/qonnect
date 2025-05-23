@@ -21,58 +21,55 @@ class IndividualPage extends StatefulWidget {
 }
 
 class _IndividualPageState extends State<IndividualPage> {
+  OwnUserDetailModel get sourceChat => getIt<OwnUserDetailModel>();
 
- OwnUserDetailModel get sourceChat => getIt<OwnUserDetailModel>();
-
- @override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
     log(sourceChat.toJson().toString(), name: "Source Chat");
   }
-  
- 
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MessageBloc()
-        ..add(LoadMessages(
-          sourceChat.id.toString(),
-          widget.chatModel.id.toString()
-        )),
+      create:
+          (_) =>
+              MessageBloc()..add(
+                LoadMessages(
+                  sourceChat.id.toString(),
+                  widget.chatModel.id.toString(),
+                ),
+              ),
       child: BlocBuilder<MessageBloc, MessageState>(
         builder: (context, state) {
           if (state is MessagesLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           if (state is MessagesLoaded) {
             return ListView.builder(
               itemCount: state.messages.length,
               itemBuilder: (context, index) {
                 // Your message UI building logic
-              }
+                return Scaffold();
+              },
             );
           }
-          
+
           if (state is MessageError) {
             return Center(child: Text(state.error));
           }
-          
-          return const SizedBox();
-        }
-      )
-    
+
+          return Scaffold();
+        },
+      ),
     );
   }
 
   void sendMessage(String message) {
     context.read<MessageBloc>().add(
-      SendTextMessage(
-        message,
-        sourceChat.id,
-        widget.chatModel.id
-      )
+      SendTextMessage(message, sourceChat.id, widget.chatModel.id),
     );
   }
 }
