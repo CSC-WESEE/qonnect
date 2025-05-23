@@ -21,10 +21,6 @@ class DBHelper {
       length,
       (index) => chars[random.nextInt(chars.length)],
     ).join();
-    return List.generate(
-      length,
-      (index) => chars[random.nextInt(chars.length)],
-    ).join();
   }
 
   // Initialize the database
