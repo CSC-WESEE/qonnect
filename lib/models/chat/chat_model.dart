@@ -43,23 +43,3 @@ class ChatModel {
   }
 }
 
-class OwnUserDetailModel {
-  String name;
-  String icon;
-  int id;
-  OwnUserDetailModel({
-    required this.name,
-    required this.icon,
-    required this.id,
-  });
-}
-
-
-class OwnUserDetailModelProvider with ChangeNotifier{
- late final OwnUserDetailModel ownUserDetailModel;
-
- void createOwnerInfoObject(String name, String icon, int id) {
-  ownUserDetailModel = OwnUserDetailModel(icon: icon, id: id, name: name);
-  notifyListeners();
- }
-}

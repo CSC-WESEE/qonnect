@@ -14,5 +14,6 @@ class Routes {
   static const String dashboard = '/dashboard';
   static const String loginPage = '/loginPage';
   static const String users = '/message/users';
+  static const String individualPage = '/message/individual';
 
 }

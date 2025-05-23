@@ -1,8 +1,10 @@
 import 'package:go_router/go_router.dart';
+import 'package:qonnect/models/chat/chat_model.dart';
 import 'package:qonnect/routes/routes.dart';
 import 'package:qonnect/screens/authentication/login_page.dart';
 import 'package:qonnect/screens/dashboard/dashboard.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
+import 'package:qonnect/screens/dashboard/messaging/individual_page.dart';
 import 'package:qonnect/screens/dashboard/messaging/users.dart';
 import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/services/auth/authentication_repository.dart';
@@ -26,6 +28,10 @@ class RouterHandler {
       ),
       GoRoute(path: Routes.loginPage, builder: (context, state) => LoginPage()),
       GoRoute(path: Routes.users, builder: (context, state) => UserListPage()),
+      GoRoute(path: Routes.individualPage, builder: (context, state) {
+        final chatModel = state.extra as ChatModel;
+        return IndividualPage(chatModel: chatModel);
+      }),
     ],
   );
 }
