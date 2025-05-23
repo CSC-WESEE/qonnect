@@ -3,12 +3,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
 import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/services/address_book/address_bloc.dart';
 import 'package:qonnect/services/auth/authentication_repository.dart';
-import 'package:qonnect/services/auth/registration/auth_bloc.dart';
+import 'package:qonnect/services/auth/auth/auth_bloc.dart';
 import 'package:qonnect/services/socket_connection/socket_service.dart';
 import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:toastification/toastification.dart';
@@ -23,7 +24,8 @@ void main() async {
         RepositoryProvider(create: (context) => getIt<AuthenticationRepository>()),
         RepositoryProvider(create: (context) => getIt<RouterHandler>()),
         RepositoryProvider(create: (context) => getIt<DioHandler>(),),
-        RepositoryProvider(create: (context) => getIt<SocketService>(),)
+        RepositoryProvider(create: (context) => getIt<SocketService>(),),
+        RepositoryProvider(create: (context) => getIt<ChatModelRepository>(),),
       ],
       child: MultiBlocProvider(
         providers: [

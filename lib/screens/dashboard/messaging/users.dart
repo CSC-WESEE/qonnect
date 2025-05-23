@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/models/address_book/users.dart';
+import 'package:qonnect/models/chat/chat_model_repository.dart';
+import 'package:qonnect/service_locators/locators.dart';
 
 class UserListPage extends StatefulWidget {
   const UserListPage({super.key});
@@ -96,10 +98,16 @@ class _UserListPageState extends State<UserListPage> {
                   ),
                   onChanged: filterUsers,
                 )
-                : Text('Select User to Chat', style: TextStyle(color: Colors.white),),
+                : Text(
+                  'Select User to Chat',
+                  style: TextStyle(color: Colors.white),
+                ),
         actions: [
           IconButton(
-            icon: Icon(isSearching ? Icons.clear : Icons.search, color: Colors.white,),
+            icon: Icon(
+              isSearching ? Icons.clear : Icons.search,
+              color: Colors.white,
+            ),
             onPressed: () {
               if (isSearching) {
                 cancelSearch();
@@ -122,7 +130,13 @@ class _UserListPageState extends State<UserListPage> {
                   return ListTile(
                     title: Text(user.name!),
                     subtitle: Text(user.email!),
-                    onTap: () {},
+                    onTap: () {
+                      getIt<ChatModelRepository>().updateChatModelRepo(
+                        user.name!,
+                        user.id!,
+                      );
+                      Navigator.pop(context); // Add this line to go back to messaging screen
+                    },
                   );
                 },
               ),

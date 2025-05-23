@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:path_provider/path_provider.dart';
 import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqlFFi;
 
 class DBHelper {
   static Database? _database;
@@ -28,7 +29,10 @@ class DBHelper {
 
     // String path = join(await getDatabasesPath(), 'chat_database.db');
     // print("Path: $path");
-    final directory = await getExternalStorageDirectory();
+    final directory =
+        Platform.isAndroid
+            ? await getExternalStorageDirectory()
+            : await getApplicationDocumentsDirectory();
     final path = '${directory?.path}/databases/chat_database.db';
     final file = File(path);
     log("Path: $path");
@@ -40,35 +44,69 @@ class DBHelper {
     }
 
     // Open the database with encryption password
-    _database = await openDatabase(
-      path,
-      // password: '1234',
-      password: dbPassword,
-      onCreate: (db, version) async {
-        await db.execute(
-          '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
-        );
-        await db.execute(
-          '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
-        );
-        await db.execute(
-          'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, email TEXT)',
-        );
-        await db.execute(
-          'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
-        );
-        await db.execute(
-          'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
-        );
-        await db.execute(
-          '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
-        );
-        // await db.execute('CREATE TABLE calllogs()');
-      },
-      version: 1,
-    ).onError((error, _) {
-      throw error.toString();
-    });
+    _database =
+        Platform.isLinux
+            ? await sqlFFi.databaseFactoryFfi
+                .openDatabase(
+                  path,
+                  // password: '1234',
+                  options: sqlFFi.OpenDatabaseOptions(
+                    version: 1,
+                    onCreate: (db, version) async {
+                      await db.execute(
+                        '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
+                      );
+                      await db.execute(
+                        '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+                      );
+                      await db.execute(
+                        'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, email TEXT)',
+                      );
+                      await db.execute(
+                        'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
+                      );
+                      await db.execute(
+                        'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+                      );
+                      await db.execute(
+                        '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
+                      );
+                      // await db.execute('CREATE TABLE calllogs()');
+                    },
+                  ),
+                )
+                .onError((error, _) {
+                  throw error.toString();
+                })
+            : await openDatabase(
+              path,
+              // password: '1234',
+              password: dbPassword,
+              onCreate: (db, version) async {
+                await db.execute(
+                  '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
+                );
+                await db.execute(
+                  '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+                );
+                await db.execute(
+                  'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, email TEXT)',
+                );
+                await db.execute(
+                  'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
+                );
+                await db.execute(
+                  'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+                );
+                await db.execute(
+                  '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
+                );
+                // await db.execute('CREATE TABLE calllogs()');
+              },
+              version: 1,
+            ).onError((error, _) {
+              throw error.toString();
+            });
     return _database!;
   }
 

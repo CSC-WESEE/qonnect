@@ -2,8 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/apis/auth/auth.dart';
-import 'package:qonnect/services/auth/registration/auth_events.dart';
-import 'package:qonnect/services/auth/registration/auth_state.dart';
+import 'package:qonnect/services/auth/auth/auth_events.dart';
+import 'package:qonnect/services/auth/auth/auth_state.dart';
 import 'package:qonnect/utils/LocalDB/local_db.dart';
 import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 

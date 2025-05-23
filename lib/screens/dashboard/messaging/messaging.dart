@@ -3,11 +3,12 @@ import 'dart:io';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
-import 'package:qonnect/services/address_book/address_bloc.dart';
-import 'package:qonnect/services/address_book/address_book_events.dart';
+import 'package:qonnect/service_locators/locators.dart';
 
 class Messaging extends StatefulWidget {
   const Messaging({super.key});
@@ -17,12 +18,55 @@ class Messaging extends StatefulWidget {
 }
 
 class _MessagingState extends State<Messaging> {
+  late final ChatModelRepository chatModelRepo;
+
+  @override
+  void initState() {
+    super.initState();
+    chatModelRepo = getIt<ChatModelRepository>();
+  }
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (context, __) {
-        return  buildMessageScreenForPortrait();
+        return ListenableBuilder(
+          listenable: chatModelRepo,
+          builder: (context, _) {
+            return (Platform.isLinux || __ == Orientation.landscape)
+                ? buildMessageScreenForLandscape()
+                : buildMessageScreenForPortrait();
+          },
+        );
       },
+    );
+  }
+
+  Widget buildMessageScreenForPortrait() {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.large(
+        onPressed: () {
+          context.read<RouterHandler>().router.push(Routes.users);
+        },
+        child: Icon(Icons.perm_contact_cal_outlined),
+      ),
+      body: ListView.builder(
+        shrinkWrap: true,
+        itemCount: chatModelRepo.chatModels.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () async {
+              
+            },
+            child: ListTile(
+              title: Text(chatModelRepo.chatModels[index].name),
+              subtitle: Text("Hi"),
+            ),
+          );
+        },
+
+        // Display the contact information
+      ),
     );
   }
 
@@ -38,7 +82,7 @@ class _MessagingState extends State<Messaging> {
               // Sidebar Header
               Container(
                 padding: const EdgeInsets.all(16),
-                child: const Row(
+                child:  Row(
                   children: [
                     Text(
                       'Team Chat',
@@ -49,30 +93,16 @@ class _MessagingState extends State<Messaging> {
                       ),
                     ),
                     Spacer(),
-                    Icon(Icons.expand_more, color: Colors.white),
+                    InkWell(
+                      onTap: (){
+                          context.read<RouterHandler>().router.push(Routes.users);
+                      },
+                      child: Icon(Icons.perm_contact_cal_outlined, color: Colors.white,)),
                   ],
                 ),
               ),
+
               // Sidebar Items
-              ListTile(
-                leading: const Icon(
-                  Icons.alternate_email,
-                  color: Colors.white70,
-                ),
-                title: const Text(
-                  'Mentions',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                onTap: () {},
-              ),
-              ListTile(
-                leading: const Icon(Icons.star_border, color: Colors.white70),
-                title: const Text(
-                  'Starred',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                onTap: () {},
-              ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text(
@@ -81,6 +111,22 @@ class _MessagingState extends State<Messaging> {
                 ),
               ),
               // Add more chat items here
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: chatModelRepo.chatModels.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () async {},
+                    child: ListTile(
+                      textColor: Colors.white,
+                      title: Text(chatModelRepo.chatModels[index].name),
+                      subtitle: Text("Hi"),
+                    ),
+                  );
+                },
+
+                // Display the contact information
+              ),
             ],
           ),
         ),
@@ -155,17 +201,6 @@ class _MessagingState extends State<Messaging> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget buildMessageScreenForPortrait() {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.large(onPressed: () {
-          context.read<RouterHandler>().router.push(Routes.users);
-      },
-      child: Icon(Icons.perm_contact_cal_outlined),
-      
-      ),
     );
   }
 }
