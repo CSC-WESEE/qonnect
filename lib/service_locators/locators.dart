@@ -16,13 +16,13 @@ Future<void> setupServiceLocator() async {
   await authenticationRepository.checkIfAuthenticated();
   final socketService = SocketService();
   socketService.connect();
-  final ownUserDetailModel = OwnUserDetailModel();
-  ownUserDetailModel.updateOwnUserModel();
 
   getIt.registerSingleton<DioHandler>(dioHandler);
   getIt.registerSingleton<AuthenticationRepository>(authenticationRepository);
   getIt.registerSingleton<RouterHandler>(RouterHandler());
   getIt.registerSingleton<SocketService>(socketService);
   getIt.registerSingleton<ChatModelRepository>(ChatModelRepository());
-  getIt.registerSingleton<OwnUserDetailModel>(ownUserDetailModel);
+  getIt.registerLazySingletonAsync<OwnUserDetailModel>(() async {
+    return await OwnUserDetailModel.create();
+  });
 }

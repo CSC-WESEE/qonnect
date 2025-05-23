@@ -22,7 +22,14 @@ class IndividualPage extends StatefulWidget {
 
 class _IndividualPageState extends State<IndividualPage> {
 
-  final sourceChat = OwnUserDetailModel()..updateOwnUserModel();
+ OwnUserDetailModel get sourceChat => getIt<OwnUserDetailModel>();
+
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    log(sourceChat.toJson().toString(), name: "Source Chat");
+  }
   
  
   @override

@@ -3,9 +3,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
+import 'package:qonnect/models/OwnUserDetialsModel.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 import 'package:qonnect/screens/dashboard/meetings/meetings.dart';
 import 'package:qonnect/screens/dashboard/messaging/messaging.dart';
+import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/utils/LocalDB/local_db.dart';
 
 List<Map<String, dynamic>> userInfo = [];
@@ -24,11 +26,11 @@ class _DashboardState extends State<Dashboard>  {
   void initState() {
     super.initState();
     getOwnerInfo();
+     
   }
 
   void getOwnerInfo() async {
-    userInfo = await DBHelper.getOwnerInfo();
-    log(userInfo.toString(), name: "User Info");
+  await getIt.isReady<OwnUserDetailModel>();
   }
 
   final List<Widget> _pages = [
