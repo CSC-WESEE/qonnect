@@ -1,17 +1,12 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:qonnect/models/chat/chat_model.dart';
 import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
 import 'package:qonnect/service_locators/locators.dart';
-import 'package:qonnect/services/address_book/address_bloc.dart';
-import 'package:qonnect/services/address_book/address_book_events.dart';
-
 class Messaging extends StatefulWidget {
   const Messaging({super.key});
 
@@ -57,7 +52,9 @@ class _MessagingState extends State<Messaging> {
         itemCount: chatModelRepo.chatModels.length,
         itemBuilder: (context, index) {
           return InkWell(
-            onTap: () async {},
+            onTap: () async {
+              
+            },
             child: ListTile(
               title: Text(chatModelRepo.chatModels[index].name),
               subtitle: Text("Hi"),

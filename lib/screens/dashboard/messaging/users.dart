@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/models/address_book/users.dart';
-import 'package:qonnect/models/chat/chat_model.dart';
 import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/service_locators/locators.dart';
 
