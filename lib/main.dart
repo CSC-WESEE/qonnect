@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {
+  HttpOverrides.global = MyHttpOverrides();
   await dotenv.load(fileName: ".env");
   await setupServiceLocator();
   WidgetsFlutterBinding.ensureInitialized();
