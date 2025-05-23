@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
+import 'package:qonnect/screens/dashboard/messaging/individual_page.dart';
 import 'package:qonnect/service_locators/locators.dart';
 
 class Messaging extends StatefulWidget {
@@ -56,7 +57,10 @@ class _MessagingState extends State<Messaging> {
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () async {
-              
+              context.read<RouterHandler>().router.push(
+                    Routes.individualPage,
+                    extra: chatModelRepo.chatModels[index],
+                  );
             },
             child: ListTile(
               title: Text(chatModelRepo.chatModels[index].name),
@@ -160,14 +164,18 @@ class _MessagingState extends State<Messaging> {
                 ),
               ),
               // Chat Messages Area
-              Expanded(
+              if(chatModelRepo.chatModels.isEmpty)
+                  Expanded(
                 child: Container(
                   color: Colors.white,
                   child: const Center(
                     child: Text('Chat messages will appear here'),
                   ),
                 ),
-              ),
+              )
+              else
+              IndividualPage(chatModel: chatModelRepo.chatModels[0]),
+             
               // Message Input
               Container(
                 padding: const EdgeInsets.all(16),
