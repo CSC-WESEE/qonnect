@@ -29,6 +29,7 @@ void main() async {
         RepositoryProvider(create: (context) => getIt<DioHandler>(),),
         RepositoryProvider(create: (context) => getIt<SocketService>(),),
         RepositoryProvider(create: (context) => getIt<ChatModelRepository>(),),
+        RepositoryProvider(create: (context) => getIt<OwnUserDetailModel>(),),
         RepositoryProvider(create: (context) => getIt<OwnUserDetailModel>(),)
       ],
       child: MultiBlocProvider(

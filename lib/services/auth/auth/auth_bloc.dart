@@ -30,6 +30,7 @@ class AuthBloc extends Bloc<AuthEvents, AuthState> {
         log(token.toString(), name: "Token from AuthBloc");
         log("Login successful from API");
 
+
         emit(LoginSuccessState('Login successful!', token.toString()));
       } catch (e) {
         emit(LoginErrorState(e.toString()));

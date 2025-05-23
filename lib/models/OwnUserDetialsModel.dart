@@ -1,15 +1,26 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/utils/LocalDB/local_db.dart';
 
 class OwnUserDetailModel {
- late String name;
- late String email;
- late int id;
+  String name;
+  String email;
+  int id;
 
-   OwnUserDetailModel.fromJson(Map<String, dynamic> json) {
+  // Initialize with default values in constructor
+  OwnUserDetailModel({
+    this.name = '',
+    this.email = '',
+    this.id = 0,
+  });
+
+  static Future<OwnUserDetailModel> create() async {
+    var model = OwnUserDetailModel();
+    await model.updateOwnUserModel();
+    return model;
+  }
+
+  void updateFromJson(Map<String, dynamic> json) {
     try {
       name = json['userName']?.toString() ?? '';
       email = json['email']?.toString() ?? '';
@@ -22,25 +33,18 @@ class OwnUserDetailModel {
     }
   }
 
-   void updateOwnUserModel() async {
-    var res = await DBHelper.getOwnerInfo();
-    log(res.toString(), name: "RES from DB helper");
-    OwnUserDetailModel.fromJson(res[0]);
-    
+  Future<void> updateOwnUserModel() async {
+    try {
+      var res = await DBHelper.getOwnerInfo();
+      if (res.isNotEmpty) {
+        updateFromJson(res[0]);
+      }
+    } catch (e) {
+      log('Error updating user model: $e');
+    }
   }
-
-  
 
   Map<String, dynamic> toJson() {
     return {'name': name, 'email': email, 'id': id};
   }
-
-  OwnUserDetailModel() {
-    log(" OwnUserDetailModel constructor called");
-    updateOwnUserModel();
-  }
-}
-
-class OwnUserDetailModelProvider with ChangeNotifier {
-  late final OwnUserDetailModel ownUserDetailModel;
 }
