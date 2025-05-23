@@ -53,24 +53,24 @@ class DBHelper {
                   options: sqlFFi.OpenDatabaseOptions(
                     version: 1,
                     onCreate: (db, version) async {
-                      await db.execute(
-                        'CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
-                      );
-                      await db.execute(
-                        '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
-                      );
-                      await db.execute(
-                        'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, icon TEXT)',
-                      );
-                      await db.execute(
-                        'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
-                      );
-                      await db.execute(
-                        'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
-                      );
-                      await db.execute(
-                        '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
-                      );
+                     await db.execute(
+          '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
+        );
+        await db.execute(
+          '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+        );
+        await db.execute(
+          'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, email TEXT)',
+        );
+        await db.execute(
+          'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
+        );
+        await db.execute(
+          'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+        );
+        await db.execute(
+          '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
+        );
                       // await db.execute('CREATE TABLE calllogs()');
                     },
                   ),
@@ -84,23 +84,23 @@ class DBHelper {
               password: dbPassword,
               onCreate: (db, version) async {
                 await db.execute(
-                  '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
-                );
-                await db.execute(
-                  '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
-                );
-                await db.execute(
-                  'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, icon TEXT)',
-                );
-                await db.execute(
-                  'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
-                );
-                await db.execute(
-                  'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
-                );
-                await db.execute(
-                  '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
-                );
+          '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
+        );
+        await db.execute(
+          '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+        );
+        await db.execute(
+          'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, email TEXT)',
+        );
+        await db.execute(
+          'CREATE TABLE callDetails(id INTEGER PRIMARY KEY, callerId TEXT, receiverId TEXT, receiverName TEXT, call_type TINYINT, roomId TEXT, start_call_timestamp TEXT, call_status TINYINT )',
+        );
+        await db.execute(
+          'CREATE TABLE groupDetails(roomId TEXT PRIMARY KEY, sender TEXT, participants TEXT, groupName TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER)',
+        );
+        await db.execute(
+          '''CREATE TABLE groupMessages(id INTEGER PRIMARY KEY, roomId TEXT, sender TEXT, participants TEXT, message TEXT, path TEXT, message_type TEXT, uuid TEXT, timeStamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered')''',
+        );
                 // await db.execute('CREATE TABLE calllogs()');
               },
               version: 1,
@@ -111,40 +111,26 @@ class DBHelper {
   }
 
   // For ownerInfo table
-  static Future<int> insertOwnerUserID(int userid) async {
+  static Future<void> insertOwnerInfo(int id, String name, String email) async {
     final db = await initDB();
-    int id = await db.insert('ownerInfo', {
-      'userID': userid,
-      'icon': '',
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
-    return id;
-  }
-
-  // For ownerInfo table
-  static Future<void> updateOwnerInfo(int id, String name, String icon) async {
-    final db = await initDB();
-    log("Username from Setup profile page: $name");
     try {
-      int count = await db.rawUpdate(
-        '''
-      UPDATE ownerInfo 
-      SET userName = ?, icon =? 
-      WHERE userID = ?
-      ''',
-        [name, icon, id],
-      );
-      log(count.toString(), name: "Number of rows updated in OwnerInfo table");
-      // Fetch and print the updated row
+      int newId = await db.insert('ownerInfo', {
+        'userID': id,
+        'userName': name,
+        'email': email,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      log("Inserted row ID: $newId", name: "OwnerInfo Insert");
+
+      // Fetch and print the inserted row
       List<Map<String, dynamic>> result = await db.rawQuery(
         '''
-    SELECT * FROM ownerInfo 
-    WHERE userID = ?
+      SELECT * FROM ownerInfo WHERE userID = ?
     ''',
         [id],
       );
 
       if (result.isNotEmpty) {
-        log("Updated row: ${result.first}");
+        log("Inserted row: ${result.first}");
       } else {
         log("No row found with userID: $id");
       }
@@ -692,4 +678,5 @@ class DBHelper {
       log("Error in updating the file path: $error");
     }
   }
+
 }
