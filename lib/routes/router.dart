@@ -4,10 +4,14 @@ import 'package:qonnect/screens/authentication/login_page.dart';
 import 'package:qonnect/screens/dashboard/dashboard.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 import 'package:qonnect/screens/dashboard/messaging/users.dart';
+import 'package:qonnect/service_locators/locators.dart';
+import 'package:qonnect/services/auth/authentication_repository.dart';
 
 class RouterHandler {
   final GoRouter router = GoRouter(
-    initialLocation: Routes.loginPage,
+    initialLocation: getIt<AuthenticationRepository>().token != null
+        ? Routes.dashboard
+        : Routes.loginPage,
     routes: [
       GoRoute(
         path: Routes.homePage,

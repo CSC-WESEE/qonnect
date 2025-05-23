@@ -10,11 +10,13 @@ final getIt = GetIt.instance;
 Future<void> setupServiceLocator() async {
   final dioHandler = DioHandler();
   await dioHandler.initialize();
+  final authenticationRepository = AuthenticationRepository();
+  await authenticationRepository.checkIfAuthenticated();
   final socketService = SocketService();
   socketService.connect();
 
   getIt.registerSingleton<DioHandler>(dioHandler);
-  getIt.registerSingleton<AuthenticationRepository>(AuthenticationRepository());
+  getIt.registerSingleton<AuthenticationRepository>(authenticationRepository);
   getIt.registerSingleton<RouterHandler>(RouterHandler());
   getIt.registerSingleton<SocketService>(socketService);
   getIt.registerSingleton<ChatModelRepository>(ChatModelRepository());

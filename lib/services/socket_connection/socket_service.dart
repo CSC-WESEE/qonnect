@@ -7,6 +7,17 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:async';
 
+
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 class SocketService {
   late IO.Socket socket;
   final Connectivity _connectivity = Connectivity();
@@ -22,8 +33,7 @@ class SocketService {
         "reconnection": true,
         "reconnectionAttempts": 50,
         "reconnectionDelay": 1000,
-        "secure": true,
-        "rejectUnauthorized": false,
+        "secure" : true,
       });
 
       socket.connect();
