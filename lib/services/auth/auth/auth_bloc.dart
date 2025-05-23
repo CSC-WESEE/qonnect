@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/apis/auth/auth.dart';
 import 'package:qonnect/services/auth/auth/auth_events.dart';
 import 'package:qonnect/services/auth/auth/auth_state.dart';
+import 'package:qonnect/utils/LocalDB/local_db.dart';
 import 'package:qonnect/utils/handlers/flutter_secure_storage_handler.dart';
 
 class AuthBloc extends Bloc<AuthEvents, AuthState> {
@@ -19,6 +20,8 @@ class AuthBloc extends Bloc<AuthEvents, AuthState> {
           key: 'token',
           value: response.data['token'],
         );
+
+        DBHelper.insertOwnerInfo(response.data['id'], response.data['name'], response.data['email']);
 
         var token = await flutterSecureStorageHandler.secureStorage.read(
           key: 'token',
