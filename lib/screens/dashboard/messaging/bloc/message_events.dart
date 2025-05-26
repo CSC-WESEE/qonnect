@@ -26,7 +26,8 @@ class LoadMessages extends MessageEvent {
 }
 
 class DeleteMessage extends MessageEvent {
-  final String messageId;
+  // final String messageId;
+  final String uuid;
   
-  DeleteMessage(this.messageId);
+  DeleteMessage(this.uuid);
 }

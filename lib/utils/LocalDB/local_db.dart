@@ -57,7 +57,7 @@ class DBHelper {
                         '''CREATE TABLE contacts(recID INTEGER PRIMARY KEY, name TEXT, lastMsg TEXT, timeStamp TEXT, isSender INTEGER, message_status TEXT DEFAULT 'not_delivered')''',
                       );
                       await db.execute(
-                        '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_id TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
+                        '''CREATE TABLE messages(id INTEGER PRIMARY KEY, sender TEXT, receiver TEXT, message TEXT, path TEXT, message_type TEXT, uuidId TEXT, timestamp TEXT, message_reaction TEXT, message_status TEXT DEFAULT 'not_delivered' )''',
                       );
                       await db.execute(
                         'CREATE TABLE ownerInfo(userID INTEGER, userName TEXT, email TEXT)',
@@ -277,11 +277,11 @@ class DBHelper {
   }
 
   // For messages table
-  static Future<void> deleteOneMessage(int messageId) async {
+  static Future<void> deleteOneMessage(String uuid) async {
     log("Inside delete function");
     final db = await initDB();
     try {
-      await db.delete('messages', where: 'id = ?', whereArgs: [messageId]);
+      await db.delete('messages', where: 'uuidId = ?', whereArgs: [uuid]);
     } catch (error) {
       log("The error in deletion is: $error");
     }
