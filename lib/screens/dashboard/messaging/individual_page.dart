@@ -11,6 +11,7 @@ import 'package:qonnect/screens/dashboard/messaging/bloc/message_states.dart';
 import 'package:qonnect/screens/dashboard/messaging/own_message_card.dart';
 import 'package:qonnect/screens/dashboard/messaging/reply_message_card.dart';
 import 'package:qonnect/service_locators/locators.dart';
+import 'package:qonnect/services/socket_connection/socket_service.dart';
 
 class IndividualPage extends StatefulWidget {
   final ChatModel chatModel;
@@ -24,6 +25,7 @@ class IndividualPage extends StatefulWidget {
 
 class _IndividualPageState extends State<IndividualPage> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   OwnUserDetailModel get sourceChat => getIt<OwnUserDetailModel>();
 
   @override
@@ -35,14 +37,28 @@ class _IndividualPageState extends State<IndividualPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create:
-          (_) =>
-              MessageBloc()..add(
-                LoadMessages(
-                  sourceChat.id.toString(),
-                  widget.chatModel.id.toString(),
-                ),
+      create: (_) {
+        final bloc = MessageBloc();
+        bloc.add(
+          LoadMessages(
+            sourceChat.id.toString(),
+            widget.chatModel.id.toString(),
+          ),
+        );
+        // Listen for socket messages
+        getIt<SocketService>().socket.on("message", (data) async {
+          if (data['targetid'].toString() == widget.chatModel.id.toString() ||
+              data['sourceid'].toString() == widget.chatModel.id.toString()) {
+            bloc.add(
+              LoadMessages(
+                sourceChat.id.toString(),
+                widget.chatModel.id.toString(),
               ),
+            );
+          }
+        });
+        return bloc;
+      },
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -72,19 +88,23 @@ class _IndividualPageState extends State<IndividualPage> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is MessagesLoaded) {
                       return ListView.builder(
+                        controller: _scrollController,
+                        reverse: true, // Make list scroll from bottom
                         shrinkWrap: true,
                         itemCount: state.messages.length,
                         itemBuilder: (context, index) {
-                          final message = state.messages[index];
+                          final message =
+                              state.messages[state.messages.length - 1 - index];
                           if (message['sender'] == sourceChat.id.toString()) {
                             return OwnMessageCard(
                               message: message['message'],
                               time: message['timestamp'].substring(11, 16),
-                              messageStatus: message['messageStatus'] ?? MessageStatus.sent,
+                              messageStatus:
+                                  message['messageStatus'] ??
+                                  MessageStatus.sent,
                               emojiReaction: message['message_reaction'] ?? "",
                             );
                           } else {
-                            log("Replyt card called", name: "Reply Card");
                             return ReplyCard(
                               emojiReaction: message['message_reaction'],
                               message: message['message'],
@@ -108,6 +128,12 @@ class _IndividualPageState extends State<IndividualPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void sendMessage(String message) {
@@ -159,7 +185,26 @@ class _IndividualPageState extends State<IndividualPage> {
             backgroundColor: Colors.blue,
             child: IconButton(
               icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: () => sendMessage(_messageController.text),
+              onPressed: () {
+                if (_messageController.text.trim().isNotEmpty) {
+                  final message = _messageController.text;
+                  _messageController.clear(); // Clear first
+                  context.read<MessageBloc>().add(
+                    SendTextMessage(
+                      message,
+                      sourceChat.id,
+                      widget.chatModel.id,
+                      widget.chatModel.name,
+                    ),
+                  );
+                  // Scroll to bottom after sending
+                  _scrollController.animateTo(
+                    0.0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                  );
+                }
+              },
             ),
           ),
         ],

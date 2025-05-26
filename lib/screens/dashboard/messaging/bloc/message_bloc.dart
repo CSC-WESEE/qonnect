@@ -20,81 +20,69 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     on<DeleteMessage>(_onDeleteMessage);
   }
 
-  Future<void> _onLoadMessages(
-    LoadMessages event,
-    Emitter<MessageState> emit,
-  ) async {
-    emit(MessagesLoading());
-    try {
-      getIt<SocketService>().socket.on("message", (data) async{
-        log("Message received in individual page: $data");
-        int localDbMessageId = await DBHelper.insertMessage(
-        data['sourceid'].toString(),
-        data['targetid'].toString(),
-        data['message'],
-        data['path'],
-        data['metadata']['type'],
-        data['uuidId'],
-        DateTime.now().toIso8601String(),
-        '',
-        '',
-        );
-        log(localDbMessageId.toString(), name: "Local DB Message ID");
-        
-      });
-      final messages = await DBHelper.getMessages(
-        event.sourceId,
-        event.targetId,
-      );
-      emit(MessagesLoaded(messages));
-    } catch (e) {
-      emit(MessageError(e.toString()));
-    }
+ Future<void> _onLoadMessages(
+  LoadMessages event,
+  Emitter<MessageState> emit,
+) async {
+  try {
+    final messages = await DBHelper.getMessages(
+      event.sourceId,
+      event.targetId,
+    );
+    emit(MessagesLoaded(messages.reversed.toList())); // Reverse the list
+  } catch (e) {
+    emit(MessageError(e.toString()));
   }
+}
 
-  Future<void> _onSendTextMessage(
-    SendTextMessage event,
-    Emitter<MessageState> emit,
-  ) async {
-    try {
-      var uuid = generateUuid();
-      // Add your socket.io message sending logic here
-      getIt<SocketService>().socket.emit('message', {
-        'message': event.message,
-        "metadata": {"type": "text"},
-        "sourceid": event.sourceId,
-        "targetid": event.targetId,
-        "path": '',
-        "uuidId": uuid,
-      });
+Future<void> _onSendTextMessage(
+  SendTextMessage event,
+  Emitter<MessageState> emit,
+) async {
+  try {
+    var uuid = generateUuid();
+    // Add your socket.io message sending logic here
+    getIt<SocketService>().socket.emit('message', {
+      'message': event.message,
+      "metadata": {"type": "text"},
+      "sourceid": event.sourceId,
+      "targetid": event.targetId,
+      "path": '',
+      "uuidId": uuid,
+    });
 
-      // Add lastmessage to contacts table
-      await DBHelper.updateContactsWithLastMsg(
-        event.targetId,
-        event.name,
-        event.message,
-        DateTime.now().toIso8601String(),
-        1,
-      );
-      // Add message to local database
-      await DBHelper.insertMessage(
-        event.sourceId.toString(),
-        event.targetId.toString(),
-        event.message,
-        '',
-        'text',
-        uuid,
-        DateTime.now().toIso8601String(),
-        '',
-        '',
-      );
+    // Add message to local database
+    await DBHelper.insertMessage(
+      event.sourceId.toString(),
+      event.targetId.toString(),
+      event.message,
+      '',
+      'text',
+      uuid,
+      DateTime.now().toIso8601String(),
+      '',
+      '',
+    );
 
-      add(LoadMessages(event.sourceId.toString(), event.targetId.toString()));
-      emit(MessageSent());
-    } catch (e) {
-      emit(MessageError(e.toString()));
-    }
+    // Update contacts
+    await DBHelper.updateContactsWithLastMsg(
+      event.targetId,
+      event.name,
+      event.message,
+      DateTime.now().toIso8601String(),
+      1,
+    );
+
+    // Load messages after sending
+    final messages = await DBHelper.getMessages(
+      event.sourceId.toString(),
+      event.targetId.toString(),
+    );
+    emit(MessagesLoaded(messages));
+  } catch (e) {
+    emit(MessageError(e.toString()));
   }
+}
 
   Future<void> _onSendFileMessage(
     SendFileMessage event,
