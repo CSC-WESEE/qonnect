@@ -34,7 +34,7 @@ class SocketService {
         "reconnection": true,
         "reconnectionAttempts": 50,
         "reconnectionDelay": 1000,
-        "secure" : true,
+        
       });
 
       socket.connect();

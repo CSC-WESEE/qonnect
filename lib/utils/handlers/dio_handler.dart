@@ -18,10 +18,10 @@ class DioHandler {
 
   Future<void> initialize() async {
     await getJwtToken();
-    dio = Dio()
-      ..options.baseUrl = '${dotenv.env['CONNECTION_URL']}'
-      ..options.headers['Authorization'] = 'Bearer $token';
-    await createSecureDio();
+    dio =
+        Dio()
+          ..options.baseUrl = '${dotenv.env['CONNECTION_URL']}'
+          ..options.headers['Authorization'] = 'Bearer $token';
   }
 
   DioHandler() {
