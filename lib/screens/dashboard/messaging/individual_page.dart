@@ -193,63 +193,11 @@ class _IndividualPageState extends State<IndividualPage> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    iconcreation(
-                      Icons.insert_drive_file,
-                      Colors.indigo,
-                      "Document",
-                      () {},
-                    ),
-                    const SizedBox(width: 40),
-                    iconcreation(
-                      Icons.camera_alt,
-                      Colors.pink,
-                      "Camera",
-                      () {},
-                    ),
-                    const SizedBox(width: 40),
-                    iconcreation(
-                      Icons.insert_photo,
-                      Colors.purple,
-                      "Gallery",
-                      () {},
-                    ),
-                  ],
-                ),
+                buildFirstRow(),
                 const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    iconcreation(Icons.headset, Colors.orange, "Audio", () {}),
-                    const SizedBox(width: 40),
-                    iconcreation(Icons.videocam, Colors.cyan, "Video", () {}),
-                    const SizedBox(width: 40),
-                    iconcreation(
-                      Icons.location_pin,
-                      Colors.teal,
-                      "Location",
-                      () {},
-                    ),
-                  ],
-                ),
+                buildSecondRow(),
                 const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    iconcreation(
-                      Icons.event,
-                      Colors.indigoAccent,
-                      "Event",
-                      () {},
-                    ),
-                    const SizedBox(width: 40),
-                    iconcreation(Icons.link, Colors.greenAccent, "Link", () {}),
-                    const SizedBox(width: 40),
-                    iconcreation(Icons.note, Colors.brown, "Note", () {}),
-                  ],
-                ),
+                buildThirdRow(),
               ],
             ),
           ),
@@ -278,5 +226,109 @@ class _IndividualPageState extends State<IndividualPage> {
         ],
       ),
     );
+  }
+
+  Widget buildFirstRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        iconcreation(
+          Icons.insert_drive_file,
+          Colors.indigo,
+          "Document",
+          documentSharing,
+        ),
+        const SizedBox(width: 40),
+        iconcreation(
+          Icons.camera_alt,
+          Colors.pink,
+          "Camera",
+          imageSharingUsingCamera,
+        ),
+        const SizedBox(width: 40),
+        iconcreation(
+          Icons.insert_photo,
+          Colors.purple,
+          "Gallery",
+          imageSharingUsingGallery,
+        ),
+      ],
+    );
+  }
+
+  Widget buildSecondRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        iconcreation(Icons.headset, Colors.orange, "Audio", audioSharing),
+        const SizedBox(width: 40),
+        iconcreation(Icons.videocam, Colors.cyan, "Video", videoSharing),
+        const SizedBox(width: 40),
+        iconcreation(
+          Icons.location_pin,
+          Colors.teal,
+          "Location",
+          locationSharing,
+        ),
+      ],
+    );
+  }
+
+  Widget buildThirdRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        iconcreation(Icons.event, Colors.indigoAccent, "Event", eventSharing),
+        const SizedBox(width: 40),
+        iconcreation(Icons.link, Colors.greenAccent, "Link", linkSharing),
+        const SizedBox(width: 40),
+        iconcreation(Icons.note, Colors.brown, "Note", noteSharing),
+      ],
+    );
+  }
+
+  void documentSharing() {
+    // Implement document sharing functionality
+    log("Document sharing clicked");
+  }
+
+  void imageSharingUsingCamera() {
+    // Implement image sharing using camera functionality
+    log("Image sharing using camera clicked");
+  }
+
+  void imageSharingUsingGallery() {
+    // Implement image sharing using gallery functionality
+    log("Image sharing using gallery clicked");
+  }
+
+  void audioSharing() { 
+    // Implement audio sharing functionality
+    log("Audio sharing clicked");
+  }
+
+  void videoSharing() {
+    // Implement video sharing functionality
+    log("Video sharing clicked");
+  }
+
+  void locationSharing() {
+    // Implement location sharing functionality
+    log("Location sharing clicked");
+  }
+
+  void eventSharing() {
+    // Implement event sharing functionality
+    log("Event sharing clicked");
+  }
+
+  void linkSharing() {
+    // Implement link sharing functionality
+    log("Link sharing clicked");
+  }
+
+  void noteSharing() {
+    // Implement note sharing functionality
+    log("Note sharing clicked");
   }
 }
