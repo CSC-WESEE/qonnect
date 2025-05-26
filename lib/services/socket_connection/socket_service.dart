@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:qonnect/models/OwnUserDetialsModel.dart';
+import 'package:qonnect/service_locators/locators.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:async';
 
@@ -26,7 +28,6 @@ class SocketService {
 
   void connect() {
     try {
-      // log("Attempting to connect to: ${dotenv.env['CONNECTION_URL']}");
       socket = IO.io(dotenv.env['CONNECTION_URL'], <String, dynamic>{
         "transports": ["websocket"],
         "autoConnect": true,
@@ -52,7 +53,8 @@ class SocketService {
       // No need to call _reconnect() here since reconnect is handled on network change
     });
 
-    socket.on('connect', (_) {
+    socket.on('connect', (data) {
+      log(data.toString());
       log("Connected to server.");
       if (_userId != null) {
         socket.emit("signin", _userId);
@@ -60,6 +62,17 @@ class SocketService {
         log("Re-emitted signin for userId: $_userId after reconnection.");
       }
     });
+  }
+
+  void signIn(String userId) {
+    log("Sign in method called");
+    _userId = userId;
+    if (socket.connected) {
+      socket.emit("signin", userId);
+      log("Emitted signin for userId: $userId");
+    } else {
+      log("Socket not connected. Sign-in will attempt when connected.");
+    }
   }
 
   void _listenToNetworkChanges() {

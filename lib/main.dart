@@ -8,6 +8,7 @@ import 'package:qonnect/models/OwnUserDetialsModel.dart';
 import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/routes/router.dart';
 import 'package:qonnect/routes/routes.dart';
+import 'package:qonnect/screens/dashboard/messaging/bloc/message_bloc.dart';
 import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/services/address_book/address_bloc.dart';
 import 'package:qonnect/services/auth/authentication_repository.dart';
@@ -36,6 +37,7 @@ void main() async {
         providers: [
           BlocProvider(create: (context) => AuthBloc()),
           BlocProvider(create: (context) => AddressBloc()),
+          BlocProvider(create: (context) => MessageBloc(),)
         ],
         child: const RootWidget(),
       ),
