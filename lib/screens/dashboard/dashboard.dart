@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/models/OwnUserDetialsModel.dart';
+import 'package:qonnect/models/chat/chat_model_repository.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 import 'package:qonnect/screens/dashboard/meetings/meetings.dart';
 import 'package:qonnect/screens/dashboard/messaging/messaging.dart';
@@ -26,11 +27,16 @@ class _DashboardState extends State<Dashboard>  {
   void initState() {
     super.initState();
     getOwnerInfo();
+    getFetchedContactsFromDB();
      
   }
 
   void getOwnerInfo() async {
   await getIt.isReady<OwnUserDetailModel>();
+  }
+
+  void getFetchedContactsFromDB () async{
+    await getIt.isReady<ChatModelRepository>();
   }
 
   final List<Widget> _pages = [

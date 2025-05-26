@@ -44,4 +44,11 @@ class ChatModelRepository extends ChangeNotifier {
       notifyListeners(); // Add this line to notify listeners
     }
   }
+
+  static Future<ChatModelRepository> fetchContacts()  async{
+      var contacts = await DBHelper.getContacts();
+      var fetchedContactsFromDB = ChatModelRepository();
+      fetchedContactsFromDB.fromJson(contacts);
+      return fetchedContactsFromDB;
+  }
 }

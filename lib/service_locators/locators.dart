@@ -21,7 +21,9 @@ Future<void> setupServiceLocator() async {
   getIt.registerSingleton<AuthenticationRepository>(authenticationRepository);
   getIt.registerSingleton<RouterHandler>(RouterHandler());
   getIt.registerSingleton<SocketService>(socketService);
-  getIt.registerSingleton<ChatModelRepository>(ChatModelRepository());
+  getIt.registerLazySingletonAsync<ChatModelRepository>(() async{
+    return await ChatModelRepository.fetchContacts();
+  });
   getIt.registerLazySingletonAsync<OwnUserDetailModel>(() async {
     return await OwnUserDetailModel.create();
   });
