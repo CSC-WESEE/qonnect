@@ -18,7 +18,7 @@ import 'package:qonnect/utils/handlers/dio_handler.dart';
 import 'package:toastification/toastification.dart';
 
 void main() async {
-  HttpOverrides.global = MyHttpOverrides();
+  // HttpOverrides.global = MyHttpOverrides();
   await dotenv.load(fileName: ".env");
   await setupServiceLocator();
   WidgetsFlutterBinding.ensureInitialized();
