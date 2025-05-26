@@ -12,6 +12,7 @@ import 'package:qonnect/screens/dashboard/messaging/own_message_card.dart';
 import 'package:qonnect/screens/dashboard/messaging/reply_message_card.dart';
 import 'package:qonnect/service_locators/locators.dart';
 import 'package:qonnect/services/socket_connection/socket_service.dart';
+import 'package:qonnect/utils/LocalDB/local_db.dart';
 
 class IndividualPage extends StatefulWidget {
   final ChatModel chatModel;
@@ -53,7 +54,7 @@ class _IndividualPageState extends State<IndividualPage> {
   void _setupSocketListener() {
     getIt<SocketService>().socket.on("message", (data) async {
       log("Socket message received: $data", name: "Socket");
-      
+      await DBHelper.insertMessage(data['sourceid'].toString(), data['targetid'].toString(), data['message'], data['path'], 'text', data['uuidId'], DateTime.now().toIso8601String(), '', '');
       // Check if the message is for this conversation
       if (data['targetid'].toString() == widget.chatModel.id.toString() ||
           data['sourceid'].toString() == widget.chatModel.id.toString()) {
