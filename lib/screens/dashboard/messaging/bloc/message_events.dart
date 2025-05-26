@@ -4,8 +4,9 @@ class SendTextMessage extends MessageEvent {
   final String message;
   final int sourceId;
   final int targetId;
+  final String name;
   
-  SendTextMessage(this.message, this.sourceId, this.targetId);
+  SendTextMessage(this.message, this.sourceId, this.targetId, this.name);
 }
 
 class SendFileMessage extends MessageEvent {

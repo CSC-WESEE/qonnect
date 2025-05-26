@@ -95,7 +95,7 @@ class _IndividualPageState extends State<IndividualPage> {
   void sendMessage(String message) {
     log(message, name: "Message");
     context.read<MessageBloc>().add(
-      SendTextMessage(message, sourceChat.id, widget.chatModel.id),
+      SendTextMessage(message, sourceChat.id, widget.chatModel.id, widget.chatModel.name),
     );
   }
 
