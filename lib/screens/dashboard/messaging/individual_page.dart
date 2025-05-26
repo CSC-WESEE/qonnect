@@ -26,39 +26,70 @@ class IndividualPage extends StatefulWidget {
 class _IndividualPageState extends State<IndividualPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late MessageBloc _messageBloc;
+  
   OwnUserDetailModel get sourceChat => getIt<OwnUserDetailModel>();
 
   @override
   void initState() {
     super.initState();
     log(sourceChat.toJson().toString(), name: "Source Chat");
+    
+    // Initialize the bloc
+    _messageBloc = MessageBloc();
+    
+    // Load initial messages
+    _messageBloc.add(
+      LoadMessages(
+        sourceChat.id.toString(),
+        widget.chatModel.id.toString(),
+      ),
+    );
+    
+    // Set up socket listener
+    _setupSocketListener();
+  }
+
+  void _setupSocketListener() {
+    getIt<SocketService>().socket.on("message", (data) async {
+      log("Socket message received: $data", name: "Socket");
+      
+      // Check if the message is for this conversation
+      if (data['targetid'].toString() == widget.chatModel.id.toString() ||
+          data['sourceid'].toString() == widget.chatModel.id.toString()) {
+        
+        // Only reload if the message is from the other user (to avoid duplicate on send)
+        if (data['sourceid'].toString() != sourceChat.id.toString()) {
+          _messageBloc.add(
+            LoadMessages(
+              sourceChat.id.toString(),
+              widget.chatModel.id.toString(),
+            ),
+          );
+          
+          // Auto-scroll to bottom when receiving new message
+          _scrollToBottom();
+        }
+      }
+    });
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) {
-        final bloc = MessageBloc();
-        bloc.add(
-          LoadMessages(
-            sourceChat.id.toString(),
-            widget.chatModel.id.toString(),
-          ),
-        );
-        // Listen for socket messages
-        getIt<SocketService>().socket.on("message", (data) async {
-          if (data['targetid'].toString() == widget.chatModel.id.toString() ||
-              data['sourceid'].toString() == widget.chatModel.id.toString()) {
-            bloc.add(
-              LoadMessages(
-                sourceChat.id.toString(),
-                widget.chatModel.id.toString(),
-              ),
-            );
-          }
-        });
-        return bloc;
-      },
+    return BlocProvider<MessageBloc>.value(
+      value: _messageBloc,
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -82,19 +113,24 @@ class _IndividualPageState extends State<IndividualPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: BlocBuilder<MessageBloc, MessageState>(
+                child: BlocConsumer<MessageBloc, MessageState>(
+                  listener: (context, state) {
+                    // Auto-scroll when messages are loaded
+                    if (state is MessagesLoaded) {
+                      _scrollToBottom();
+                    }
+                  },
                   builder: (context, state) {
                     if (state is MessagesLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is MessagesLoaded) {
                       return ListView.builder(
                         controller: _scrollController,
-                        reverse: true, // Make list scroll from bottom
+                        reverse: false,
                         shrinkWrap: true,
                         itemCount: state.messages.length,
                         itemBuilder: (context, index) {
-                          final message =
-                              state.messages[state.messages.length - 1 - index];
+                          final message = state.messages[index];
                           if (message['sender'] == sourceChat.id.toString()) {
                             return OwnMessageCard(
                               message: message['message'],
@@ -132,13 +168,16 @@ class _IndividualPageState extends State<IndividualPage> {
 
   @override
   void dispose() {
+    // Clean up socket listener
+    getIt<SocketService>().socket.off("message");
     _scrollController.dispose();
+    _messageBloc.close();
     super.dispose();
   }
 
   void sendMessage(String message) {
     log(message, name: "Message");
-    context.read<MessageBloc>().add(
+    _messageBloc.add(
       SendTextMessage(
         message,
         sourceChat.id,
@@ -188,20 +227,14 @@ class _IndividualPageState extends State<IndividualPage> {
               onPressed: () {
                 if (_messageController.text.trim().isNotEmpty) {
                   final message = _messageController.text;
-                  _messageController.clear(); // Clear first
-                  context.read<MessageBloc>().add(
+                  _messageController.clear();
+                  _messageBloc.add(
                     SendTextMessage(
                       message,
                       sourceChat.id,
                       widget.chatModel.id,
                       widget.chatModel.name,
                     ),
-                  );
-                  // Scroll to bottom after sending
-                  _scrollController.animateTo(
-                    0.0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
                   );
                 }
               },
@@ -356,47 +389,38 @@ class _IndividualPageState extends State<IndividualPage> {
   }
 
   void documentSharing() {
-    // Implement document sharing functionality
     log("Document sharing clicked");
   }
 
   void imageSharingUsingCamera() {
-    // Implement image sharing using camera functionality
     log("Image sharing using camera clicked");
   }
 
   void imageSharingUsingGallery() {
-    // Implement image sharing using gallery functionality
     log("Image sharing using gallery clicked");
   }
 
   void audioSharing() {
-    // Implement audio sharing functionality
     log("Audio sharing clicked");
   }
 
   void videoSharing() {
-    // Implement video sharing functionality
     log("Video sharing clicked");
   }
 
   void locationSharing() {
-    // Implement location sharing functionality
     log("Location sharing clicked");
   }
 
   void eventSharing() {
-    // Implement event sharing functionality
     log("Event sharing clicked");
   }
 
   void linkSharing() {
-    // Implement link sharing functionality
     log("Link sharing clicked");
   }
 
   void noteSharing() {
-    // Implement note sharing functionality
     log("Note sharing clicked");
   }
 }
