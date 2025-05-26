@@ -1,4 +1,6 @@
-import 'dart:nativewrappers/_internal/vm/lib/developer.dart';
+
+
+import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/screens/dashboard/messaging/bloc/message_events.dart';
@@ -24,8 +26,21 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   ) async {
     emit(MessagesLoading());
     try {
-      getIt<SocketService>().socket.on("message", (data) {
+      getIt<SocketService>().socket.on("message", (data) async{
         log("Message received in individual page: $data");
+        int localDbMessageId = await DBHelper.insertMessage(
+        data['sourceid'].toString(),
+        data['targetid'].toString(),
+        data['message'],
+        data['path'],
+        data['metadata']['type'],
+        data['uuidId'],
+        DateTime.now().toIso8601String(),
+        '',
+        '',
+        );
+        log(localDbMessageId.toString(), name: "Local DB Message ID");
+        
       });
       final messages = await DBHelper.getMessages(
         event.sourceId,
@@ -68,7 +83,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
         event.message,
         '',
         'text',
-        generateUuid(),
+        uuid,
         DateTime.now().toIso8601String(),
         '',
         '',

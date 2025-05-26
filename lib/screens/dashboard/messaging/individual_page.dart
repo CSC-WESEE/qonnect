@@ -8,6 +8,8 @@ import 'package:qonnect/models/chat/chat_model.dart';
 import 'package:qonnect/screens/dashboard/messaging/bloc/message_bloc.dart';
 import 'package:qonnect/screens/dashboard/messaging/bloc/message_events.dart';
 import 'package:qonnect/screens/dashboard/messaging/bloc/message_states.dart';
+import 'package:qonnect/screens/dashboard/messaging/own_message_card.dart';
+import 'package:qonnect/screens/dashboard/messaging/reply_message_card.dart';
 import 'package:qonnect/service_locators/locators.dart';
 
 class IndividualPage extends StatefulWidget {
@@ -61,6 +63,7 @@ class _IndividualPageState extends State<IndividualPage> {
         ),
         body: SafeArea(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: BlocBuilder<MessageBloc, MessageState>(
@@ -69,10 +72,25 @@ class _IndividualPageState extends State<IndividualPage> {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is MessagesLoaded) {
                       return ListView.builder(
+                        shrinkWrap: true,
                         itemCount: state.messages.length,
                         itemBuilder: (context, index) {
-                          // Your message UI building logic
-                          return Scaffold();
+                          final message = state.messages[index];
+                          if (message['sender'] == sourceChat.id.toString()) {
+                            return OwnMessageCard(
+                              message: message['message'],
+                              time: message['timestamp'].substring(11, 16),
+                              messageStatus: message['messageStatus'] ?? MessageStatus.sent,
+                              emojiReaction: message['message_reaction'] ?? "",
+                            );
+                          } else {
+                            log("Replyt card called", name: "Reply Card");
+                            return ReplyCard(
+                              emojiReaction: message['message_reaction'],
+                              message: message['message'],
+                              time: message['timestamp'].substring(11, 16),
+                            );
+                          }
                         },
                       );
                     } else if (state is MessageError) {
@@ -95,7 +113,12 @@ class _IndividualPageState extends State<IndividualPage> {
   void sendMessage(String message) {
     log(message, name: "Message");
     context.read<MessageBloc>().add(
-      SendTextMessage(message, sourceChat.id, widget.chatModel.id, widget.chatModel.name),
+      SendTextMessage(
+        message,
+        sourceChat.id,
+        widget.chatModel.id,
+        widget.chatModel.name,
+      ),
     );
   }
 
@@ -302,7 +325,7 @@ class _IndividualPageState extends State<IndividualPage> {
     log("Image sharing using gallery clicked");
   }
 
-  void audioSharing() { 
+  void audioSharing() {
     // Implement audio sharing functionality
     log("Audio sharing clicked");
   }
