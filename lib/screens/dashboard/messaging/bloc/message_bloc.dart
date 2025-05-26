@@ -2,6 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qonnect/screens/dashboard/messaging/bloc/message_events.dart';
 import 'package:qonnect/screens/dashboard/messaging/bloc/message_states.dart';
 import 'package:qonnect/utils/LocalDB/local_db.dart';
+import 'package:uuid/data.dart';
+import 'package:uuid/rng.dart';
+import 'package:uuid/uuid.dart';
 
 class MessageBloc extends Bloc<MessageEvent, MessageState> {
   MessageBloc() : super(MessageInitial()) {
@@ -50,7 +53,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
 
   Future<void> _onDeleteMessage(DeleteMessage event, Emitter<MessageState> emit) async {
     try {
-      await DBHelper.deleteOneMessage(int.parse(event.messageId));
+      await DBHelper.deleteOneMessage(event.uuid);
       // Reload messages after deletion
       emit(MessageSent());
     } catch (e) {
@@ -59,7 +62,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
   }
 
   String generateUuid() {
-    // Add UUID generation logic
-    return DateTime.now().millisecondsSinceEpoch.toString();
+    var uuid = const Uuid();
+    return uuid.v4(config: V4Options(null, CryptoRNG())).toString();
   }
 }
