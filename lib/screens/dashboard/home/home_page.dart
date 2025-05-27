@@ -13,7 +13,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.deepPurple,
       body: Center(
-        child: Container(
+        child: SizedBox(
           height: 320,
           width: 320,
           child: Center(

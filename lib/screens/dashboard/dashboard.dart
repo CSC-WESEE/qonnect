@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:qonnect/apis/address_book/address_book.dart';
 import 'package:qonnect/models/OwnUserDetialsModel.dart';
 import 'package:qonnect/models/chat/chat_model_repository.dart';
+import 'package:qonnect/screens/dashboard/account/account_page.dart';
 import 'package:qonnect/screens/dashboard/home/home_page.dart';
 import 'package:qonnect/screens/dashboard/meetings/meetings.dart';
 import 'package:qonnect/screens/dashboard/messaging/messaging.dart';
@@ -35,7 +36,8 @@ class _DashboardState extends State<Dashboard> {
     HomePage(),
     Messaging(),
     Meetings(),
-    const Center(child: Text('Account Page')),
+    // const Center(child: Text('Account Page')),
+    AccountPage(),
   ];
 
   @override
