@@ -51,18 +51,6 @@ class _AccountPageState extends State<AccountPage> {
           ),
         ],
       ),
-      // child: GridView.count(
-      //   crossAxisCount: 2,
-      //   mainAxisSpacing: 16,
-      //   crossAxisSpacing: 16,
-      //   childAspectRatio: 1.5,
-      //   children: [
-      //     buildProfileCard(),
-      //     buildSettingsCard(),
-      //     buildUsageStatsCard(),
-      //     buildCurrentLocationCard(),
-      //   ],
-      // ),
     );
   }
 

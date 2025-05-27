@@ -84,7 +84,7 @@ class _MeetingsState extends State<Meetings> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Past Meetings',
+                  'Scheduled Meetings',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 TextButton(onPressed: () {}, child: const Text('View All')),
